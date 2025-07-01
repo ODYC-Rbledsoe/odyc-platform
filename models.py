@@ -7,7 +7,7 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
-    role = db.Column(db.String(20), nullable=False, default='student')  # student, mentor, admin
+    role = db.Column(db.String(20), nullable=False, default='student')  # student, mentor, coordinator, admin
     bio = db.Column(db.Text)
     interests_expertise = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -27,6 +27,9 @@ class User(UserMixin, db.Model):
     
     def is_student(self):
         return self.role == 'student'
+    
+    def is_coordinator(self):
+        return self.role == 'coordinator'
 
 class Match(db.Model):
     id = db.Column(db.Integer, primary_key=True)

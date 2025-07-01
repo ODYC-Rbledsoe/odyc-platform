@@ -12,7 +12,8 @@ class RegistrationForm(FlaskForm):
         DataRequired(), EqualTo('password', message='Passwords must match')])
     role = SelectField('Role', choices=[
         ('student', 'Student'),
-        ('mentor', 'Mentor')
+        ('mentor', 'Mentor'),
+        ('coordinator', 'Mentor Coordinator')
     ], validators=[DataRequired()])
     bio = TextAreaField('Bio', validators=[Length(max=500)])
     interests_expertise = TextAreaField('Interests/Expertise', validators=[Length(max=500)])
@@ -41,3 +42,11 @@ class ProfileForm(FlaskForm):
     bio = TextAreaField('Bio', validators=[Length(max=500)])
     interests_expertise = TextAreaField('Interests/Expertise', validators=[Length(max=500)])
     submit = SubmitField('Update Profile')
+
+class ScheduleSessionForm(FlaskForm):
+    match_id = SelectField('Match', coerce=int, validators=[DataRequired()])
+    date = DateTimeField('Session Date', validators=[DataRequired()], 
+                        widget=DateTimeLocalInput(), default=datetime.now)
+    topic = StringField('Topic', validators=[DataRequired(), Length(max=200)])
+    notes = TextAreaField('Notes')
+    submit = SubmitField('Schedule Session')

@@ -103,11 +103,12 @@ The application uses three main entities:
 ## Changelog
 - July 01, 2025: Complete Flask mentorship platform deployed successfully
   - Full authentication system with role-based access control
-  - Student, mentor, and admin dashboards working
+  - Student, mentor, admin, and coordinator dashboards working
   - Match creation and session logging functionality
   - Bootstrap dark theme with professional styling
   - PostgreSQL database integration
   - All core features tested and verified
+  - Added coordinator role for session scheduling and management
 
 ## User Preferences
 

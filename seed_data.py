@@ -48,6 +48,14 @@ def create_sample_data():
             }
         ]
         
+        # Sample coordinator
+        coordinator_data = {
+            'name': 'Maria Garcia',
+            'email': 'maria.garcia@coordinator.com',
+            'bio': 'Experienced program coordinator with 5 years managing mentorship programs. Passionate about connecting people and facilitating learning.',
+            'interests_expertise': 'Program Management, Coordination, Educational Psychology, Communication'
+        }
+        
         # Sample mentors
         mentors_data = [
             {
@@ -78,6 +86,21 @@ def create_sample_data():
         
         created_students = []
         created_mentors = []
+        created_coordinator = None
+        
+        # Create coordinator
+        if not User.query.filter_by(email=coordinator_data['email']).first():
+            coordinator = User(
+                name=coordinator_data['name'],
+                email=coordinator_data['email'],
+                password_hash=generate_password_hash('coordinator123'),
+                role='coordinator',
+                bio=coordinator_data['bio'],
+                interests_expertise=coordinator_data['interests_expertise']
+            )
+            db.session.add(coordinator)
+            created_coordinator = coordinator
+            print(f"Created coordinator: {coordinator.name}")
         
         # Create students
         for student_data in students_data:
@@ -181,10 +204,13 @@ def create_sample_data():
         print("\nSample data creation completed!")
         print("\nDemo Credentials:")
         print("Admin: admin@mentorship.com / admin123")
+        print("Coordinator: maria.garcia@coordinator.com / coordinator123")
         print("Students: [name]@student.com / student123")
         print("Mentors: [name]@mentor.com / mentor123")
-        print("\nExample student login: alice.johnson@student.com / student123")
-        print("Example mentor login: sarah.mitchell@mentor.com / mentor123")
+        print("\nExample logins:")
+        print("Student: alice.johnson@student.com / student123")
+        print("Mentor: sarah.mitchell@mentor.com / mentor123")
+        print("Coordinator: maria.garcia@coordinator.com / coordinator123")
 
 if __name__ == '__main__':
     create_sample_data()

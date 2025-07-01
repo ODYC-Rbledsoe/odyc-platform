@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Coordinator Dashboard - Mentorship Platform{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4"><i class="fas fa-calendar-check me-2"></i>Coordinator Dashboard</h2>
+        <p class="lead">Welcome back, {{ current_user.name }}! Manage mentorship sessions and coordination.</p>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-handshake fa-2x text-primary mb-2"></i>
+                <h4>{{ stats.active_matches }}</h4>
+                <small class="text-muted">Active Matches</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-calendar-alt fa-2x text-success mb-2"></i>
+                <h4>{{ stats.total_sessions }}</h4>
+                <small class="text-muted">Total Sessions</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                <h4>{{ stats.upcoming_sessions }}</h4>
+                <small class="text-muted">Upcoming Sessions</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                <h4>{{ stats.total_matches }}</h4>
+                <small class="text-muted">All Matches</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <a href="{{ url_for('dashboard.schedule_session') }}" class="btn btn-primary w-100">
+                            <i class="fas fa-calendar-plus me-2"></i>Schedule Session
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="{{ url_for('admin.manage_matches') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-handshake me-2"></i>View All Matches
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="{{ url_for('admin.manage_users') }}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-users me-2"></i>View All Users
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Upcoming Sessions -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Upcoming Sessions</h5>
+                <a href="{{ url_for('dashboard.schedule_session') }}" class="btn btn-outline-primary btn-sm">Schedule New</a>
+            </div>
+            <div class="card-body">
+                {% if upcoming_sessions %}
+                    {% for session in upcoming_sessions %}
+                    <div class="border rounded p-3 mb-3">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="mb-1">{{ session.topic }}</h6>
+                                <p class="text-muted mb-1">
+                                    <i class="fas fa-users me-1"></i>{{ session.match.student.name }} with {{ session.match.mentor.name }}
+                                </p>
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-calendar me-1"></i>{{ session.date.strftime('%B %d, %Y at %I:%M %p') }}
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <span class="badge bg-info">Scheduled</span>
+                                <br>
+                                <a href="{{ url_for('dashboard.edit_session', session_id=session.id) }}" class="btn btn-outline-primary btn-sm mt-2">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No upcoming sessions scheduled.</p>
+                        <a href="{{ url_for('dashboard.schedule_session') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Schedule First Session
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Sessions</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_sessions %}
+                    {% for session in recent_sessions[:5] %}
+                    <div class="border-bottom py-2">
+                        <h6 class="mb-1">{{ session.topic }}</h6>
+                        <small class="text-muted">
+                            {{ session.match.student.name }} with {{ session.match.mentor.name }}
+                            <br>
+                            <i class="fas fa-calendar me-1"></i>{{ session.date.strftime('%B %d, %Y') }}
+                        </small>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-0">No sessions recorded yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Active Matches Overview -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-handshake me-2"></i>Active Matches</h5>
+                <small class="text-muted">{{ matches|length }} active pairs</small>
+            </div>
+            <div class="card-body">
+                {% if matches %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Mentor</th>
+                                <th>Start Date</th>
+                                <th>Sessions</th>
+                                <th>Last Session</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for match in matches %}
+                            <tr>
+                                <td>{{ match.student.name }}</td>
+                                <td>{{ match.mentor.name }}</td>
+                                <td>{{ match.start_date.strftime('%m/%d/%Y') }}</td>
+                                <td>{{ match.sessions.count() }}</td>
+                                <td>
+                                    {% if match.sessions %}
+                                        {% set sessions_list = match.sessions | list %}
+                                        {% if sessions_list %}
+                                            {{ sessions_list[-1].date.strftime('%m/%d/%Y') }}
+                                        {% else %}
+                                            <span class="text-muted">None</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">None</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('dashboard.schedule_session') }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-calendar-plus"></i>
+                                    </a>
+                                    <a href="{{ url_for('dashboard.view_sessions', match_id=match.id) }}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-handshake fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No active matches found.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

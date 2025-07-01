@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app import db
 from models import User, Match, Session
-from forms import SessionForm, ProfileForm
+from forms import SessionForm, ProfileForm, ScheduleSessionForm
 from datetime import datetime
 
 dashboard_bp = Blueprint('dashboard', __name__)
@@ -12,6 +12,8 @@ dashboard_bp = Blueprint('dashboard', __name__)
 def dashboard():
     if current_user.is_admin():
         return redirect(url_for('admin.admin_dashboard'))
+    elif current_user.is_coordinator():
+        return redirect(url_for('dashboard.coordinator_dashboard'))
     elif current_user.is_student():
         return render_template('student_dashboard.html')
     elif current_user.is_mentor():
@@ -45,6 +47,40 @@ def mentor_dashboard():
     # Get mentor's matches and sessions
     matches = current_user.mentor_matches.filter_by(status='active').all()
     return render_template('mentor_dashboard.html', matches=matches)
+
+@dashboard_bp.route('/coordinator-dashboard')
+@login_required
+def coordinator_dashboard():
+    if not current_user.is_coordinator():
+        flash('Access denied.', 'danger')
+        return redirect(url_for('dashboard.dashboard'))
+    
+    # Get all matches for coordination
+    matches = Match.query.filter_by(status='active').all()
+    
+    # Get recent sessions
+    recent_sessions = Session.query.order_by(Session.created_at.desc()).limit(10).all()
+    
+    # Get statistics
+    total_matches = Match.query.count()
+    active_matches = Match.query.filter_by(status='active').count()
+    total_sessions = Session.query.count()
+    
+    # Get upcoming sessions (sessions with future dates)
+    upcoming_sessions = Session.query.filter(Session.date > datetime.utcnow()).order_by(Session.date.asc()).limit(5).all()
+    
+    stats = {
+        'total_matches': total_matches,
+        'active_matches': active_matches,
+        'total_sessions': total_sessions,
+        'upcoming_sessions': len(upcoming_sessions)
+    }
+    
+    return render_template('coordinator_dashboard.html', 
+                         matches=matches, 
+                         recent_sessions=recent_sessions,
+                         upcoming_sessions=upcoming_sessions,
+                         stats=stats)
 
 @dashboard_bp.route('/log-session/<int:match_id>', methods=['GET', 'POST'])
 @login_required
@@ -149,3 +185,33 @@ def delete_session(session_id):
     db.session.commit()
     flash('Session deleted successfully!', 'success')
     return redirect(url_for('dashboard.view_sessions', match_id=match_id))
+
+@dashboard_bp.route('/schedule-session', methods=['GET', 'POST'])
+@login_required
+def schedule_session():
+    if not current_user.is_coordinator():
+        flash('Access denied.', 'danger')
+        return redirect(url_for('dashboard.dashboard'))
+    
+    form = ScheduleSessionForm()
+    
+    # Get all active matches for the dropdown
+    active_matches = Match.query.filter_by(status='active').all()
+    form.match_id.choices = [(m.id, f"{m.student.name} with {m.mentor.name}") for m in active_matches]
+    
+    if form.validate_on_submit():
+        session = Session(
+            match_id=form.match_id.data,
+            date=form.date.data,
+            topic=form.topic.data,
+            notes=form.notes.data,
+            student_reflection=""  # Will be filled later by student or mentor
+        )
+        db.session.add(session)
+        db.session.commit()
+        
+        match = Match.query.get(form.match_id.data)
+        flash(f'Session "{form.topic.data}" scheduled successfully for {match.student.name} and {match.mentor.name}!', 'success')
+        return redirect(url_for('dashboard.coordinator_dashboard'))
+    
+    return render_template('dashboard.html', form=form, action='Schedule Session')

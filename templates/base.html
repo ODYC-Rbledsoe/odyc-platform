@@ -34,6 +34,12 @@
                             <i class="fas fa-cog me-1"></i>Admin
                         </a>
                     </li>
+                    {% elif current_user.is_coordinator() %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.coordinator_dashboard') }}">
+                            <i class="fas fa-calendar-check me-1"></i>Coordination
+                        </a>
+                    </li>
                     {% endif %}
                 </ul>
                 
