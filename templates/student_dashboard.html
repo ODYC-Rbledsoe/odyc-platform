@@ -114,9 +114,8 @@
                         <small class="text-muted">Total Sessions</small>
                     </div>
                     <div class="col-6">
-                        {% set days_matched = (moment().date() - match.start_date.date()).days if match else 0 %}
-                        <h3 class="text-info">{{ ((moment().date() - match.start_date.date()).days // 7) if match else 0 }}</h3>
-                        <small class="text-muted">Weeks Matched</small>
+                        <h3 class="text-info">{{ match.start_date.strftime('%m/%d') if match else 'N/A' }}</h3>
+                        <small class="text-muted">Start Date</small>
                     </div>
                 </div>
                 {% else %}
