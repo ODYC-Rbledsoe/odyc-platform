@@ -56,10 +56,11 @@
             <div class="card-body">
                 {% set recent_sessions = [] %}
                 {% for match in matches %}
-                    {% set sessions = match.sessions.order_by(match.sessions.property.mapper.class_.date.desc()).limit(3).all() %}
-                    {% set recent_sessions = recent_sessions + sessions %}
+                    {% for session in match.sessions %}
+                        {% set recent_sessions = recent_sessions + [session] %}
+                    {% endfor %}
                 {% endfor %}
-                {% set recent_sessions = recent_sessions | sort(attribute='date', reverse=true) %}
+                {% set recent_sessions = recent_sessions | sort(attribute='created_at', reverse=true) %}
                 
                 {% if recent_sessions %}
                     {% for session in recent_sessions[:5] %}

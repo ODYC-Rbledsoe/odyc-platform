@@ -46,7 +46,6 @@
                 <h5 class="mb-0"><i class="fas fa-history me-2"></i>Session History</h5>
             </div>
             <div class="card-body">
-                {% set sessions = match.sessions.order_by(match.sessions.property.mapper.class_.date.desc()).all() %}
                 {% if sessions %}
                     {% for session in sessions %}
                     <div class="border rounded p-3 mb-3 {% if loop.index > 3 %}collapse{% endif %}" {% if loop.index > 3 %}id="moreSessionsCollapse"{% endif %}>
