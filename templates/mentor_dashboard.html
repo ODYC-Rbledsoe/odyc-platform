@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Mentor Dashboard - Mentorship Platform{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4"><i class="fas fa-user-tie me-2"></i>Mentor Dashboard</h2>
+        <p class="lead">Welcome back, {{ current_user.name }}!</p>
+    </div>
+</div>
+
+{% set matches = current_user.mentor_matches.filter_by(status='active').all() %}
+
+<div class="row">
+    <div class="col-md-8">
+        {% if matches %}
+        <!-- Students Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-users me-2"></i>Your Students</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for match in matches %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-start border-primary border-3">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ match.student.name }}</h6>
+                                <p class="card-text text-muted mb-2">{{ match.student.email }}</p>
+                                {% if match.student.interests_expertise %}
+                                <p class="card-text mb-2"><small><strong>Interests:</strong> {{ match.student.interests_expertise[:100] }}{% if match.student.interests_expertise|length > 100 %}...{% endif %}</small></p>
+                                {% endif %}
+                                <p class="card-text mb-3"><small class="text-muted">Matched since {{ match.start_date.strftime('%B %d, %Y') }}</small></p>
+                                <div class="d-flex gap-2">
+                                    <a href="{{ url_for('dashboard.log_session', match_id=match.id) }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-plus me-1"></i>Log Session
+                                    </a>
+                                    <a href="{{ url_for('dashboard.view_sessions', match_id=match.id) }}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-history me-1"></i>View History
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Sessions -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Recent Sessions</h5>
+            </div>
+            <div class="card-body">
+                {% set recent_sessions = [] %}
+                {% for match in matches %}
+                    {% set sessions = match.sessions.order_by(match.sessions.property.mapper.class_.date.desc()).limit(3).all() %}
+                    {% set recent_sessions = recent_sessions + sessions %}
+                {% endfor %}
+                {% set recent_sessions = recent_sessions | sort(attribute='date', reverse=true) %}
+                
+                {% if recent_sessions %}
+                    {% for session in recent_sessions[:5] %}
+                    <div class="border rounded p-3 mb-3">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="mb-1">{{ session.topic }} 
+                                    <small class="text-muted">with {{ session.match.student.name }}</small>
+                                </h6>
+                                <p class="text-muted mb-1">
+                                    <i class="fas fa-calendar me-1"></i>{{ session.date.strftime('%B %d, %Y at %I:%M %p') }}
+                                </p>
+                                {% if session.notes %}
+                                <p class="mb-0 text-truncate"><strong>Notes:</strong> {{ session.notes[:100] }}{% if session.notes|length > 100 %}...{% endif %}</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <a href="{{ url_for('dashboard.edit_session', session_id=session.id) }}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ url_for('dashboard.view_sessions', match_id=session.match_id) }}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if recent_sessions|length > 5 %}
+                    <div class="text-center">
+                        <a href="#" class="btn btn-outline-secondary">View All Sessions</a>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No sessions logged yet. Start by logging a session with one of your students.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <!-- No Students Assigned -->
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-user-plus fa-4x text-muted mb-4"></i>
+                <h4>No Students Assigned</h4>
+                <p class="text-muted mb-4">You haven't been assigned any students yet. Please wait for an administrator to match you with students.</p>
+                <p class="text-muted">In the meantime, make sure your profile is complete to help with the matching process.</p>
+                <a href="{{ url_for('dashboard.profile') }}" class="btn btn-primary">
+                    <i class="fas fa-user-edit me-2"></i>Update Profile
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Quick Stats -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Your Impact</h6>
+            </div>
+            <div class="card-body">
+                {% set total_sessions = 0 %}
+                {% for match in current_user.mentor_matches.all() %}
+                    {% set total_sessions = total_sessions + match.sessions.count() %}
+                {% endfor %}
+                
+                <div class="row text-center mb-3">
+                    <div class="col-6">
+                        <h3 class="text-primary">{{ current_user.mentor_matches.filter_by(status='active').count() }}</h3>
+                        <small class="text-muted">Active Students</small>
+                    </div>
+                    <div class="col-6">
+                        <h3 class="text-success">{{ total_sessions }}</h3>
+                        <small class="text-muted">Total Sessions</small>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row text-center">
+                    <div class="col-12">
+                        <h4 class="text-info">{{ current_user.mentor_matches.count() }}</h4>
+                        <small class="text-muted">Students Mentored</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                {% if matches %}
+                <div class="d-grid gap-2">
+                    {% for match in matches[:3] %}
+                    <a href="{{ url_for('dashboard.log_session', match_id=match.id) }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-plus me-2"></i>Log Session with {{ match.student.name.split()[0] }}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center text-muted">
+                    <i class="fas fa-info-circle me-2"></i>No quick actions available
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-user me-2"></i>Your Profile</h6>
+            </div>
+            <div class="card-body">
+                <h6>{{ current_user.name }}</h6>
+                <p class="text-muted mb-2">{{ current_user.email }}</p>
+                {% if current_user.bio %}
+                <p class="mb-2"><small><strong>Bio:</strong> {{ current_user.bio[:100] }}{% if current_user.bio|length > 100 %}...{% endif %}</small></p>
+                {% endif %}
+                {% if current_user.interests_expertise %}
+                <p class="mb-3"><small><strong>Expertise:</strong> {{ current_user.interests_expertise[:100] }}{% if current_user.interests_expertise|length > 100 %}...{% endif %}</small></p>
+                {% endif %}
+                <a href="{{ url_for('dashboard.profile') }}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-edit me-1"></i>Edit Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

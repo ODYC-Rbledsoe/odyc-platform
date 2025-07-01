@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Mentorship Platform{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4"><i class="fas fa-cog me-2"></i>Admin Dashboard</h2>
+        <p class="lead">Platform Overview and Management</p>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                <h4>{{ stats.total_users }}</h4>
+                <small class="text-muted">Total Users</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-graduation-cap fa-2x text-success mb-2"></i>
+                <h4>{{ stats.total_students }}</h4>
+                <small class="text-muted">Students</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-user-tie fa-2x text-info mb-2"></i>
+                <h4>{{ stats.total_mentors }}</h4>
+                <small class="text-muted">Mentors</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-handshake fa-2x text-warning mb-2"></i>
+                <h4>{{ stats.total_matches }}</h4>
+                <small class="text-muted">Total Matches</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-heart fa-2x text-danger mb-2"></i>
+                <h4>{{ stats.active_matches }}</h4>
+                <small class="text-muted">Active Matches</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-calendar-alt fa-2x text-secondary mb-2"></i>
+                <h4>{{ stats.total_sessions }}</h4>
+                <small class="text-muted">Sessions</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('admin.create_match') }}" class="btn btn-primary w-100">
+                            <i class="fas fa-plus me-2"></i>Create Match
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('admin.manage_matches') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-handshake me-2"></i>Manage Matches
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('admin.manage_users') }}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-users me-2"></i>Manage Users
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-user-plus me-2"></i>Add User
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Matches -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-handshake me-2"></i>Recent Matches</h5>
+                <a href="{{ url_for('admin.manage_matches') }}" class="btn btn-outline-primary btn-sm">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_matches %}
+                    {% for match in recent_matches %}
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                        <div>
+                            <h6 class="mb-1">{{ match.student.name }} <i class="fas fa-arrow-right mx-2 text-muted"></i> {{ match.mentor.name }}</h6>
+                            <small class="text-muted">{{ match.created_at.strftime('%B %d, %Y') }}</small>
+                        </div>
+                        <span class="badge bg-{{ 'success' if match.status == 'active' else 'secondary' }}">
+                            {{ match.status.title() }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-handshake fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-0">No matches created yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Sessions -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Recent Sessions</h5>
+                <small class="text-muted">Latest Activity</small>
+            </div>
+            <div class="card-body">
+                {% if recent_sessions %}
+                    {% for session in recent_sessions %}
+                    <div class="border-bottom py-2">
+                        <h6 class="mb-1">{{ session.topic }}</h6>
+                        <small class="text-muted">
+                            {{ session.match.student.name }} with {{ session.match.mentor.name }}
+                            <br>
+                            <i class="fas fa-calendar me-1"></i>{{ session.date.strftime('%B %d, %Y') }}
+                        </small>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-0">No sessions logged yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Status -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Platform Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6>Matching Rate</h6>
+                        {% set matching_rate = (stats.active_matches / stats.total_students * 100) if stats.total_students > 0 else 0 %}
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: {{ matching_rate }}%"></div>
+                        </div>
+                        <small class="text-muted">{{ "%.1f"|format(matching_rate) }}% of students are matched</small>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Session Activity</h6>
+                        {% set avg_sessions = (stats.total_sessions / stats.active_matches) if stats.active_matches > 0 else 0 %}
+                        <h4 class="text-primary">{{ "%.1f"|format(avg_sessions) }}</h4>
+                        <small class="text-muted">Average sessions per active match</small>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Platform Health</h6>
+                        <h4 class="text-success"><i class="fas fa-check-circle"></i> Good</h4>
+                        <small class="text-muted">All systems operational</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

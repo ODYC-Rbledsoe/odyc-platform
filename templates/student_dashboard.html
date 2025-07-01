@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - Mentorship Platform{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4"><i class="fas fa-graduation-cap me-2"></i>Student Dashboard</h2>
+        <p class="lead">Welcome back, {{ current_user.name }}!</p>
+    </div>
+</div>
+
+{% set match = current_user.student_matches.filter_by(status='active').first() %}
+
+<div class="row">
+    <div class="col-md-8">
+        {% if match %}
+        <!-- Mentor Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user-tie me-2"></i>Your Mentor</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6>{{ match.mentor.name }}</h6>
+                        <p class="text-muted mb-2">{{ match.mentor.email }}</p>
+                        {% if match.mentor.bio %}
+                        <p class="mb-2"><strong>Bio:</strong> {{ match.mentor.bio }}</p>
+                        {% endif %}
+                        {% if match.mentor.interests_expertise %}
+                        <p class="mb-0"><strong>Expertise:</strong> {{ match.mentor.interests_expertise }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Matched Since:</strong><br>{{ match.start_date.strftime('%B %d, %Y') }}</p>
+                        <p><strong>Total Sessions:</strong><br>{{ match.sessions.count() }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Session History -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Session History</h5>
+            </div>
+            <div class="card-body">
+                {% set sessions = match.sessions.order_by(match.sessions.property.mapper.class_.date.desc()).all() %}
+                {% if sessions %}
+                    {% for session in sessions %}
+                    <div class="border rounded p-3 mb-3 {% if loop.index > 3 %}collapse{% endif %}" {% if loop.index > 3 %}id="moreSessionsCollapse"{% endif %}>
+                        <div class="row">
+                            <div class="col-md-9">
+                                <h6 class="mb-1">{{ session.topic }}</h6>
+                                <p class="text-muted mb-2">
+                                    <i class="fas fa-calendar me-1"></i>{{ session.date.strftime('%B %d, %Y at %I:%M %p') }}
+                                </p>
+                                {% if session.notes %}
+                                <p class="mb-2"><strong>Notes:</strong> {{ session.notes }}</p>
+                                {% endif %}
+                                {% if session.student_reflection %}
+                                <p class="mb-0"><strong>Your Reflection:</strong> {{ session.student_reflection }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3 text-end">
+                                <span class="badge bg-success">Completed</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if sessions|length > 3 %}
+                    <div class="text-center">
+                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#moreSessionsCollapse">
+                            <i class="fas fa-chevron-down me-1"></i>Show More Sessions
+                        </button>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No sessions yet. Your mentor will schedule sessions with you.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <!-- No Mentor Assigned -->
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-user-clock fa-4x text-muted mb-4"></i>
+                <h4>No Mentor Assigned</h4>
+                <p class="text-muted mb-4">You haven't been matched with a mentor yet. Please wait for an administrator to assign you a mentor.</p>
+                <p class="text-muted">In the meantime, make sure your profile is complete to help with the matching process.</p>
+                <a href="{{ url_for('dashboard.profile') }}" class="btn btn-primary">
+                    <i class="fas fa-user-edit me-2"></i>Update Profile
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Quick Stats -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Your Progress</h6>
+            </div>
+            <div class="card-body">
+                {% if match %}
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h3 class="text-primary">{{ match.sessions.count() }}</h3>
+                        <small class="text-muted">Total Sessions</small>
+                    </div>
+                    <div class="col-6">
+                        {% set days_matched = (moment().date() - match.start_date.date()).days if match else 0 %}
+                        <h3 class="text-info">{{ ((moment().date() - match.start_date.date()).days // 7) if match else 0 }}</h3>
+                        <small class="text-muted">Weeks Matched</small>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center">
+                    <h3 class="text-muted">0</h3>
+                    <small class="text-muted">Sessions Completed</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-user me-2"></i>Your Profile</h6>
+            </div>
+            <div class="card-body">
+                <h6>{{ current_user.name }}</h6>
+                <p class="text-muted mb-2">{{ current_user.email }}</p>
+                {% if current_user.bio %}
+                <p class="mb-2"><small><strong>Bio:</strong> {{ current_user.bio[:100] }}{% if current_user.bio|length > 100 %}...{% endif %}</small></p>
+                {% endif %}
+                {% if current_user.interests_expertise %}
+                <p class="mb-3"><small><strong>Interests:</strong> {{ current_user.interests_expertise[:100] }}{% if current_user.interests_expertise|length > 100 %}...{% endif %}</small></p>
+                {% endif %}
+                <a href="{{ url_for('dashboard.profile') }}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-edit me-1"></i>Edit Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add some interactivity to the collapse button
+document.addEventListener('DOMContentLoaded', function() {
+    const collapseElement = document.getElementById('moreSessionsCollapse');
+    const toggleButton = document.querySelector('[data-bs-target="#moreSessionsCollapse"]');
+    
+    if (collapseElement && toggleButton) {
+        collapseElement.addEventListener('shown.bs.collapse', function () {
+            toggleButton.innerHTML = '<i class="fas fa-chevron-up me-1"></i>Show Less Sessions';
+        });
+        
+        collapseElement.addEventListener('hidden.bs.collapse', function () {
+            toggleButton.innerHTML = '<i class="fas fa-chevron-down me-1"></i>Show More Sessions';
+        });
+    }
+});
+</script>
+{% endblock %}
