@@ -1,12 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Student Dashboard - Mentorship Platform{% endblock %}
+{% block title %}Student Dashboard - ODYC{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-12">
-        <h2 class="mb-4"><i class="fas fa-graduation-cap me-2"></i>Student Dashboard</h2>
-        <p class="lead">Welcome back, {{ current_user.name }}!</p>
+        <h2 class="mb-3"><i class="fas fa-route me-2"></i>Your Career Journey</h2>
+        <p class="lead">Build your future in Southwest Wyoming, {{ current_user.name }}!</p>
+        <div class="alert alert-info mb-4">
+            <i class="fas fa-lightbulb me-2"></i>
+            <strong>Your Pathway to Success:</strong> Through industry mentorship and hands-on learning, 
+            you're building the skills local employers need. Every session connects you to real career opportunities in our community.
+        </div>
     </div>
 </div>
 

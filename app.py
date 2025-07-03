@@ -47,11 +47,13 @@ from auth import auth_bp
 from dashboard import dashboard_bp
 from admin import admin_bp
 from curriculum import curriculum_bp
+from career_pathways import career_bp
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(curriculum_bp)
+app.register_blueprint(career_bp)
 
 with app.app_context():
     # Import models to ensure tables are created

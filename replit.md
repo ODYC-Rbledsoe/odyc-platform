@@ -1,8 +1,14 @@
-# Mentorship Platform
+# ODYC - Mentorship and Workforce Development Platform
 
 ## Overview
 
-This is a Flask-based mentorship platform that connects students with mentors for learning and professional development. The platform provides role-based access control with three distinct user types: students, mentors, and administrators. The system facilitates mentor-student matching, session logging, and progress tracking.
+ODYC is a mentorship and workforce development platform modeled after the Southwest Wyoming Manufacturing Partnership — a coalition built on the principle of being industry-led and community-supported. The platform connects high school students with industry professionals to explore careers, build employability skills, and form meaningful connections that keep talent in Southwest Wyoming.
+
+**Mission**: Transform regional workforce development by creating personalized career roadmaps built around real-world job roles identified by local employers, while providing a scalable mentorship engine that will evolve into a community-connected talent platform.
+
+**Current Focus**: Industry professionals mentor groups of 5-6 students through structured curriculum that builds both technical and professional skills aligned to local industry needs.
+
+**Future Vision**: A comprehensive talent pipeline where industry partners invest in early talent development, access skilled candidates, and reduce hiring risk through education-to-employment pathways.
 
 ## System Architecture
 
@@ -101,6 +107,19 @@ The application uses three main entities:
 - Future migrations should use Flask-Migrate
 
 ## Changelog
+- July 03, 2025: Transformed platform to reflect ODYC workforce development vision
+  - Added career pathway models: Industry, JobRole, CareerPathway, StudentCareerInterest, EmployerPartner
+  - Created authentic Southwest Wyoming industry data with 5 industries, 7 job roles, 4 career pathways
+  - Built detailed career roadmaps based on WWCC and RSHS programs:
+    * Electrical & Instrumentation Technician (6 skill milestones, OSHA-10, ISA standards)
+    * Process Operator (Hazmat certification, emergency response, Genesis Alkali partnership)
+    * Mechanical Maintenance Technician (hydraulics/pneumatics, CMMS, preventive maintenance)
+  - Integrated real employer partnerships: Genesis Alkali, Bridger Coal, Memorial Hospital
+  - Added career exploration and pathway tracking for students
+  - Updated branding to "ODYC - Southwest Wyoming Workforce Development"
+  - Enhanced navigation with industry-focused messaging and career journey tracking
+  - Linked curriculum modules to specific career pathways with dual enrollment options
+
 - July 03, 2025: Added comprehensive curriculum management system
   - Created curriculum models: CurriculumModule, GroupProgress, StudentProgress
   - Built curriculum management interface for admins
