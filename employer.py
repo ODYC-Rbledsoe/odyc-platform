@@ -70,7 +70,7 @@ def dashboard():
         flash('Access denied. Employer account required.', 'error')
         return redirect(url_for('dashboard.index'))
     
-    employer = current_user.employer_profile
+    employer = EmployerPartner.query.filter_by(user_id=current_user.id).first()
     if not employer:
         flash('Please complete your employer profile.', 'warning')
         return redirect(url_for('employer.profile'))
@@ -112,7 +112,7 @@ def profile():
         flash('Access denied. Employer account required.', 'error')
         return redirect(url_for('dashboard.index'))
     
-    employer = current_user.employer_profile
+    employer = EmployerPartner.query.filter_by(user_id=current_user.id).first()
     if not employer:
         # Create basic profile if none exists
         employer = EmployerPartner(
@@ -147,7 +147,11 @@ def opportunities():
         flash('Access denied.', 'error')
         return redirect(url_for('dashboard.index'))
     
-    employer = current_user.employer_profile
+    employer = EmployerPartner.query.filter_by(user_id=current_user.id).first()
+    if not employer:
+        flash('Please complete your employer profile first.', 'warning')
+        return redirect(url_for('employer.profile'))
+    
     opportunities = EmployerOpportunity.query.filter_by(employer_id=employer.id).order_by(
         EmployerOpportunity.created_at.desc()).all()
     
@@ -161,7 +165,7 @@ def new_opportunity():
         flash('Access denied.', 'error')
         return redirect(url_for('dashboard.index'))
     
-    employer = current_user.employer_profile
+    employer = EmployerPartner.query.filter_by(user_id=current_user.id).first()
     form = OpportunityForm()
     
     # Populate pathway choices
@@ -199,7 +203,7 @@ def students():
         flash('Access denied.', 'error')
         return redirect(url_for('dashboard.index'))
     
-    employer = current_user.employer_profile
+    employer = EmployerPartner.query.filter_by(user_id=current_user.id).first()
     active_sponsorship = Sponsorship.query.filter_by(
         employer_id=employer.id, status='active'
     ).first()
@@ -242,7 +246,7 @@ def sponsorship():
         flash('Access denied.', 'error')
         return redirect(url_for('dashboard.index'))
     
-    employer = current_user.employer_profile
+    employer = EmployerPartner.query.filter_by(user_id=current_user.id).first()
     form = SponsorshipForm()
     
     # Populate pathway choices
@@ -306,7 +310,7 @@ def applications():
         flash('Access denied.', 'error')
         return redirect(url_for('dashboard.index'))
     
-    employer = current_user.employer_profile
+    employer = EmployerPartner.query.filter_by(user_id=current_user.id).first()
     applications = OpportunityApplication.query.join(EmployerOpportunity).filter(
         EmployerOpportunity.employer_id == employer.id
     ).order_by(OpportunityApplication.applied_at.desc()).all()
@@ -320,7 +324,7 @@ def review_application(app_id):
     if not current_user.is_employer():
         return jsonify({'error': 'Access denied'}), 403
     
-    employer = current_user.employer_profile
+    employer = EmployerPartner.query.filter_by(user_id=current_user.id).first()
     application = OpportunityApplication.query.join(EmployerOpportunity).filter(
         EmployerOpportunity.employer_id == employer.id,
         OpportunityApplication.id == app_id
