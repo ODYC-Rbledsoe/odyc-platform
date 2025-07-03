@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Manage Opportunities</h1>
+        <a href="{{ url_for('employer.new_opportunity') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Post New Opportunity
+        </a>
+    </div>
+
+    {% if opportunities %}
+        <div class="row">
+            {% for opp in opportunities %}
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ opp.title }}</h5>
+                        <span class="badge bg-{% if opp.is_accepting_applications %}success{% else %}secondary{% endif %}">
+                            {% if opp.is_accepting_applications %}Open{% else %}Closed{% endif %}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <span class="badge bg-primary">{{ opp.opportunity_type.replace('_', ' ').title() }}</span>
+                            {% if opp.pathway %}
+                                <span class="badge bg-info">{{ opp.pathway.name }}</span>
+                            {% endif %}
+                        </div>
+                        
+                        <p class="card-text">{{ opp.description[:150] }}{% if opp.description|length > 150 %}...{% endif %}</p>
+                        
+                        <div class="row text-center mb-3">
+                            <div class="col-4">
+                                <strong>{{ opp.positions_filled }}</strong>
+                                <br><small class="text-muted">Filled</small>
+                            </div>
+                            <div class="col-4">
+                                <strong>{{ opp.positions_available }}</strong>
+                                <br><small class="text-muted">Total</small>
+                            </div>
+                            <div class="col-4">
+                                <strong>{{ opp.applications|length or 0 }}</strong>
+                                <br><small class="text-muted">Applications</small>
+                            </div>
+                        </div>
+                        
+                        {% if opp.duration %}
+                            <p class="mb-1"><strong>Duration:</strong> {{ opp.duration }}</p>
+                        {% endif %}
+                        {% if opp.compensation %}
+                            <p class="mb-1"><strong>Compensation:</strong> {{ opp.compensation }}</p>
+                        {% endif %}
+                        {% if opp.application_deadline %}
+                            <p class="mb-3"><strong>Deadline:</strong> {{ opp.application_deadline.strftime('%m/%d/%Y') }}</p>
+                        {% endif %}
+                        
+                        <div class="d-grid gap-2 d-md-flex">
+                            <a href="{{ url_for('employer.applications') }}#opp-{{ opp.id }}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-file-alt me-1"></i>View Applications
+                            </a>
+                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ opp.id }}">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
+            <h3>No Opportunities Posted Yet</h3>
+            <p class="text-muted">Start connecting with ODYC students by posting your first opportunity.</p>
+            <a href="{{ url_for('employer.new_opportunity') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Post Your First Opportunity
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

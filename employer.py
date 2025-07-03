@@ -218,10 +218,10 @@ def students():
     query = db.session.query(
         User.id,
         db.func.count(StudentProgress.id).label('modules_completed'),
-        db.func.count(Session.id).label('mentoring_sessions'),
+        db.func.count(Match.id).label('mentoring_sessions'),
         CareerPathway.name.label('pathway_name')
     ).join(StudentCareerInterest).join(CareerPathway).outerjoin(StudentProgress).outerjoin(
-        Session, Session.student_id == User.id
+        Match, Match.student_id == User.id
     ).filter(User.role == 'student').group_by(User.id, CareerPathway.name)
     
     if pathway_filter:
