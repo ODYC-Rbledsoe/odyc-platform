@@ -101,6 +101,16 @@ The application uses three main entities:
 - Future migrations should use Flask-Migrate
 
 ## Changelog
+- July 03, 2025: Added comprehensive curriculum management system
+  - Created curriculum models: CurriculumModule, GroupProgress, StudentProgress
+  - Built curriculum management interface for admins
+  - Added mentor curriculum delivery system
+  - Created student learning interface with assignment submission
+  - Implemented group mentoring system with 5-6 students per mentor
+  - Added group management features for admins
+  - Seeded system with 4 comprehensive curriculum modules
+  - Updated navigation with role-based curriculum access
+
 - July 01, 2025: Complete Flask mentorship platform deployed successfully
   - Full authentication system with role-based access control
   - Student, mentor, admin, and coordinator dashboards working

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Curriculum - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-book"></i> Curriculum Management</h2>
+                <a href="{{ url_for('curriculum.create_module') }}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Create New Module
+                </a>
+            </div>
+
+            {% if modules %}
+                <div class="row">
+                    {% for module in modules %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Module {{ module.order_index }}</h6>
+                                    <span class="badge bg-{% if module.difficulty_level == 'beginner' %}success{% elif module.difficulty_level == 'intermediate' %}warning{% else %}danger{% endif %}">
+                                        {{ module.difficulty_level.title() }}
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ module.title }}</h5>
+                                    {% if module.description %}
+                                        <p class="text-muted">{{ module.description[:120] }}{% if module.description|length > 120 %}...{% endif %}</p>
+                                    {% endif %}
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock"></i> {{ module.duration_weeks }} week{% if module.duration_weeks != 1 %}s{% endif %}
+                                        </small>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar"></i> {{ module.created_at.strftime('%b %Y') }}
+                                        </small>
+                                    </div>
+                                    {% if module.learning_objectives %}
+                                        <p class="small mb-0"><strong>Objectives:</strong> {{ module.learning_objectives[:80] }}{% if module.learning_objectives|length > 80 %}...{% endif %}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer">
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('curriculum.edit_module', module_id=module.id) }}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#moduleModal{{ module.id }}">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                    </div>
+                                    {% if module.is_active %}
+                                        <span class="badge bg-success ms-2">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary ms-2">Inactive</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Module Preview Modal -->
+                        <div class="modal fade" id="moduleModal{{ module.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">{{ module.title }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>Module Details</h6>
+                                                <p><strong>Duration:</strong> {{ module.duration_weeks }} week{% if module.duration_weeks != 1 %}s{% endif %}</p>
+                                                <p><strong>Difficulty:</strong> {{ module.difficulty_level.title() }}</p>
+                                                <p><strong>Order:</strong> {{ module.order_index }}</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>Usage Statistics</h6>
+                                                <p><strong>Groups Using:</strong> {{ module.group_progress|length }}</p>
+                                                <p><strong>Students Enrolled:</strong> {{ module.student_progress|length }}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        {% if module.description %}
+                                            <h6>Description</h6>
+                                            <p>{{ module.description }}</p>
+                                        {% endif %}
+                                        
+                                        {% if module.learning_objectives %}
+                                            <h6>Learning Objectives</h6>
+                                            <p>{{ module.learning_objectives }}</p>
+                                        {% endif %}
+                                        
+                                        {% if module.resources %}
+                                            <h6>Resources</h6>
+                                            <p>{{ module.resources }}</p>
+                                        {% endif %}
+                                        
+                                        {% if module.assignments %}
+                                            <h6>Assignments</h6>
+                                            <p>{{ module.assignments }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <a href="{{ url_for('curriculum.edit_module', module_id=module.id) }}" class="btn btn-primary">Edit Module</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle"></i>
+                    No curriculum modules created yet. <a href="{{ url_for('curriculum.create_module') }}" class="alert-link">Create the first module</a>.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

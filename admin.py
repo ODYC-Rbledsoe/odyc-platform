@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app import db
-from models import User, Match, Session
-from forms import MatchForm
+from models import User, Match, Session, MentorGroup, GroupMembership, GroupSession
+from forms import MatchForm, CreateGroupForm, AddStudentToGroupForm
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -140,3 +140,120 @@ def delete_match(match_id):
     
     flash(f'Match between {student_name} and {mentor_name} deleted successfully.', 'success')
     return redirect(url_for('admin.manage_matches'))
+
+# Group Management Routes
+@admin_bp.route('/admin/groups')
+@login_required
+def manage_groups():
+    if not current_user.is_admin():
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('dashboard.dashboard'))
+    
+    groups = MentorGroup.query.all()
+    return render_template('admin/manage_groups.html', groups=groups)
+
+@admin_bp.route('/admin/create-group', methods=['GET', 'POST'])
+@login_required
+def create_group():
+    if not current_user.is_admin():
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('dashboard.dashboard'))
+    
+    form = CreateGroupForm()
+    form.mentor_id.choices = [(m.id, f"{m.name} ({m.email})") for m in User.query.filter_by(role='mentor').all()]
+    
+    if form.validate_on_submit():
+        group = MentorGroup(
+            mentor_id=form.mentor_id.data,
+            name=form.name.data,
+            description=form.description.data,
+            max_students=form.max_students.data
+        )
+        
+        db.session.add(group)
+        db.session.commit()
+        
+        flash(f'Mentor group "{group.name}" created successfully!', 'success')
+        return redirect(url_for('admin.manage_groups'))
+    
+    return render_template('admin/create_group.html', form=form)
+
+@admin_bp.route('/admin/group/<int:group_id>')
+@login_required
+def view_group(group_id):
+    if not current_user.is_admin():
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('dashboard.dashboard'))
+    
+    group = MentorGroup.query.get_or_404(group_id)
+    students = group.students
+    sessions = GroupSession.query.filter_by(group_id=group_id).order_by(GroupSession.date.desc()).all()
+    
+    # Get available students (not in any active group)
+    assigned_student_ids = [membership.student_id for membership in 
+                           GroupMembership.query.filter_by(status='active').all()]
+    available_students = User.query.filter(
+        User.role == 'student',
+        ~User.id.in_(assigned_student_ids)
+    ).all()
+    
+    return render_template('admin/view_group.html', 
+                         group=group, students=students, sessions=sessions,
+                         available_students=available_students)
+
+@admin_bp.route('/admin/add-student-to-group', methods=['POST'])
+@login_required
+def add_student_to_group():
+    if not current_user.is_admin():
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('dashboard.dashboard'))
+    
+    group_id = request.form.get('group_id')
+    student_id = request.form.get('student_id')
+    
+    group = MentorGroup.query.get_or_404(group_id)
+    student = User.query.get_or_404(student_id)
+    
+    # Check if group is full
+    if group.student_count >= group.max_students:
+        flash(f'Group "{group.name}" is already full ({group.max_students} students).', 'danger')
+        return redirect(url_for('admin.view_group', group_id=group_id))
+    
+    # Check if student is already in an active group
+    existing_membership = GroupMembership.query.filter_by(
+        student_id=student_id, status='active'
+    ).first()
+    
+    if existing_membership:
+        flash(f'{student.name} is already in an active group.', 'danger')
+        return redirect(url_for('admin.view_group', group_id=group_id))
+    
+    # Add student to group
+    membership = GroupMembership(
+        group_id=group_id,
+        student_id=student_id,
+        status='active'
+    )
+    
+    db.session.add(membership)
+    db.session.commit()
+    
+    flash(f'{student.name} added to group "{group.name}" successfully!', 'success')
+    return redirect(url_for('admin.view_group', group_id=group_id))
+
+@admin_bp.route('/admin/remove-student/<int:membership_id>', methods=['POST'])
+@login_required
+def remove_student_from_group(membership_id):
+    if not current_user.is_admin():
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('dashboard.dashboard'))
+    
+    membership = GroupMembership.query.get_or_404(membership_id)
+    group_id = membership.group_id
+    student_name = membership.student.name
+    
+    membership.status = 'dropped'
+    db.session.commit()
+    
+    flash(f'{student_name} removed from group successfully!', 'success')
+    return redirect(url_for('admin.view_group', group_id=group_id))

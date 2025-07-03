@@ -46,10 +46,12 @@ def load_user(user_id):
 from auth import auth_bp
 from dashboard import dashboard_bp
 from admin import admin_bp
+from curriculum import curriculum_bp
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(admin_bp)
+app.register_blueprint(curriculum_bp)
 
 with app.app_context():
     # Import models to ensure tables are created
