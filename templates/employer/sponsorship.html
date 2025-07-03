@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <h1 class="mb-3">ODYC Sponsorship Program</h1>
+            <p class="lead">Invest in Southwest Wyoming's workforce development and gain strategic access to emerging talent.</p>
+
+            <!-- Sponsorship Tiers -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h3 class="mb-4">Choose Your Partnership Level</h3>
+                </div>
+                
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card h-100 border-primary">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h5 class="card-title mb-0">Bronze</h5>
+                            <p class="mb-0">Basic Partner</p>
+                        </div>
+                        <div class="card-body text-center">
+                            <h3 class="text-primary">$2,500</h3>
+                            <p class="text-muted">per year</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Dashboard access</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Post opportunities</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Basic student metrics</li>
+                                <li><i class="fas fa-check text-success me-2"></i>ODYC partner listing</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card h-100 border-info">
+                        <div class="card-header bg-info text-white text-center">
+                            <h5 class="card-title mb-0">Silver</h5>
+                            <p class="mb-0">Talent Partner</p>
+                        </div>
+                        <div class="card-body text-center">
+                            <h3 class="text-info">$7,500</h3>
+                            <p class="text-muted">per year</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>All Bronze benefits</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Early talent access</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Progress analytics</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Quarterly reports</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card h-100 border-warning">
+                        <div class="card-header bg-warning text-dark text-center">
+                            <h5 class="card-title mb-0">Gold</h5>
+                            <p class="mb-0">Strategic Partner</p>
+                        </div>
+                        <div class="card-body text-center">
+                            <h3 class="text-warning">$15,000</h3>
+                            <p class="text-muted">per year</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>All Silver benefits</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Company branding</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Curriculum input</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Student mentoring</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card h-100 border-success">
+                        <div class="card-header bg-success text-white text-center">
+                            <h5 class="card-title mb-0">Platinum</h5>
+                            <p class="mb-0">Premier Partner</p>
+                        </div>
+                        <div class="card-body text-center">
+                            <h3 class="text-success">$25,000</h3>
+                            <p class="text-muted">per year</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>All Gold benefits</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Exclusive events</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Priority matching</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Custom programs</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Request Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Request Sponsorship Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.tier.label(class="form-label") }}
+                                {{ form.tier(class="form-control form-control-lg") }}
+                                {% if form.tier.errors %}
+                                    <div class="text-danger small">{{ form.tier.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.pathway_focus.label(class="form-label") }}
+                                {{ form.pathway_focus(class="form-control") }}
+                                {% if form.pathway_focus.errors %}
+                                    <div class="text-danger small">{{ form.pathway_focus.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Additional Benefits of Interest:</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        {{ form.branding_interest(class="form-check-input") }}
+                                        {{ form.branding_interest.label(class="form-check-label") }}
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form.early_access(class="form-check-input") }}
+                                        {{ form.early_access.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        {{ form.curriculum_input(class="form-check-input") }}
+                                        {{ form.curriculum_input.label(class="form-check-label") }}
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form.exclusive_events(class="form-check-input") }}
+                                        {{ form.exclusive_events.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.contact_name.label(class="form-label") }}
+                                {{ form.contact_name(class="form-control", value=employer.contact_name if employer else "") }}
+                                {% if form.contact_name.errors %}
+                                    <div class="text-danger small">{{ form.contact_name.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.contact_email.label(class="form-label") }}
+                                {{ form.contact_email(class="form-control", value=employer.contact_email if employer else "") }}
+                                {% if form.contact_email.errors %}
+                                    <div class="text-danger small">{{ form.contact_email.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.notes.label(class="form-label") }}
+                            {{ form.notes(class="form-control") }}
+                            {% if form.notes.errors %}
+                                <div class="text-danger small">{{ form.notes.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Current Sponsorships -->
+            {% if sponsorships %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Your Sponsorships</h5>
+                </div>
+                <div class="card-body">
+                    {% for sponsorship in sponsorships %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                        <div>
+                            <h6 class="mb-1">{{ sponsorship.tier.title() }} Sponsor</h6>
+                            <p class="text-muted mb-0 small">${{ "{:,}".format(sponsorship.annual_amount) }}/year</p>
+                            {% if sponsorship.pathway_focus %}
+                                <small class="text-info">Focus: {{ sponsorship.pathway_focus.name }}</small>
+                            {% endif %}
+                        </div>
+                        <span class="badge bg-{% if sponsorship.status == 'active' %}success{% elif sponsorship.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                            {{ sponsorship.status.title() }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ROI Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Partnership Impact</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-users text-primary me-2"></i>
+                        <strong>150+ Students</strong>
+                        <p class="small text-muted mb-0">Currently enrolled in career pathways</p>
+                    </div>
+                    <div class="mb-3">
+                        <i class="fas fa-graduation-cap text-success me-2"></i>
+                        <strong>85% Retention</strong>
+                        <p class="small text-muted mb-0">Students stay in Southwest Wyoming</p>
+                    </div>
+                    <div class="mb-3">
+                        <i class="fas fa-industry text-warning me-2"></i>
+                        <strong>12 Partners</strong>
+                        <p class="small text-muted mb-0">Local employers already participating</p>
+                    </div>
+                    <div class="mb-0">
+                        <i class="fas fa-chart-line text-info me-2"></i>
+                        <strong>3:1 ROI Average</strong>
+                        <p class="small text-muted mb-0">Return on sponsorship investment</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Questions?</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">Contact our Partnership Team:</p>
+                    <p class="mb-1">
+                        <i class="fas fa-envelope me-2"></i>
+                        <a href="mailto:partnerships@odyc.org">partnerships@odyc.org</a>
+                    </p>
+                    <p class="mb-1">
+                        <i class="fas fa-phone me-2"></i>
+                        <a href="tel:+13075551234">(307) 555-1234</a>
+                    </p>
+                    <p class="mb-0">
+                        <i class="fas fa-clock me-2"></i>
+                        Monday-Friday, 8:00 AM - 5:00 PM
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

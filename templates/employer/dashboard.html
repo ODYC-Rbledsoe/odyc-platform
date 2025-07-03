@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-1">{{ employer.company_name }} Dashboard</h1>
+            <p class="text-muted mb-0">{{ employer.industry.name }} • {{ employer.employee_count }} employees</p>
+        </div>
+        <div>
+            {% if active_sponsorship %}
+                <span class="badge bg-success fs-6">{{ active_sponsorship.tier.title() }} Sponsor</span>
+            {% else %}
+                <a href="{{ url_for('employer.sponsorship') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-handshake me-2"></i>Become a Sponsor
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Key Metrics Row -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ opportunities|length }}</h4>
+                            <p class="card-text mb-0">Active Opportunities</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-briefcase fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ recent_applications|length }}</h4>
+                            <p class="card-text mb-0">New Applications</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-graduate fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ total_students }}</h4>
+                            <p class="card-text mb-0">Total ODYC Students</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ employer.mentors_provided or 0 }}</h4>
+                            <p class="card-text mb-0">Mentors Provided</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chalkboard-teacher fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Opportunities -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Opportunities</h5>
+                    <a href="{{ url_for('employer.new_opportunity') }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i>Post New
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if opportunities %}
+                        {% for opp in opportunities %}
+                        <div class="d-flex justify-content-between align-items-start mb-3 pb-3 border-bottom">
+                            <div>
+                                <h6 class="mb-1">{{ opp.title }}</h6>
+                                <p class="text-muted mb-1 small">{{ opp.opportunity_type.replace('_', ' ').title() }}</p>
+                                <small class="text-success">
+                                    {{ opp.positions_filled }}/{{ opp.positions_available }} positions filled
+                                </small>
+                            </div>
+                            <span class="badge bg-{% if opp.is_accepting_applications %}success{% else %}secondary{% endif %}">
+                                {% if opp.is_accepting_applications %}Open{% else %}Closed{% endif %}
+                            </span>
+                        </div>
+                        {% endfor %}
+                        <a href="{{ url_for('employer.opportunities') }}" class="btn btn-outline-primary btn-sm">
+                            View All Opportunities
+                        </a>
+                    {% else %}
+                        <p class="text-muted mb-3">No opportunities posted yet.</p>
+                        <a href="{{ url_for('employer.new_opportunity') }}" class="btn btn-primary">
+                            Post Your First Opportunity
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Pathway Analytics -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Student Pathway Interest</h5>
+                    {% if active_sponsorship %}
+                        <a href="{{ url_for('employer.students') }}" class="btn btn-sm btn-outline-primary">
+                            View Progress
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if pathway_stats %}
+                        {% for pathway_name, count in pathway_stats %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>{{ pathway_name }}</span>
+                            <div>
+                                <span class="badge bg-primary me-2">{{ count }}</span>
+                                <div class="progress" style="width: 100px; height: 8px;">
+                                    <div class="progress-bar" style="width: {{ (count / total_students * 100) if total_students > 0 else 0 }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Student pathway data will appear here as students join career pathways.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Applications -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Applications</h5>
+                    <a href="{{ url_for('employer.applications') }}" class="btn btn-sm btn-outline-primary">
+                        View All Applications
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_applications %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Opportunity</th>
+                                        <th>Applied</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for app in recent_applications[:5] %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ app.student.name }}</strong>
+                                            <br><small class="text-muted">{{ app.student.email }}</small>
+                                        </td>
+                                        <td>{{ app.opportunity.title }}</td>
+                                        <td>{{ app.applied_at.strftime('%m/%d/%Y') }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if app.status == 'pending' %}warning{% elif app.status == 'accepted' %}success{% else %}danger{% endif %}">
+                                                {{ app.status.title() }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('employer.applications') }}#app-{{ app.id }}" class="btn btn-sm btn-outline-primary">
+                                                Review
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No applications received yet. Students will apply as you post opportunities.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('employer.new_opportunity') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-plus-circle mb-2 d-block fa-2x"></i>
+                                Post Opportunity
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('employer.profile') }}" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-building mb-2 d-block fa-2x"></i>
+                                Update Profile
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            {% if active_sponsorship %}
+                                <a href="{{ url_for('employer.students') }}" class="btn btn-outline-info w-100">
+                                    <i class="fas fa-chart-line mb-2 d-block fa-2x"></i>
+                                    View Analytics
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('employer.sponsorship') }}" class="btn btn-outline-warning w-100">
+                                    <i class="fas fa-handshake mb-2 d-block fa-2x"></i>
+                                    Become Sponsor
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('employer.applications') }}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-file-alt mb-2 d-block fa-2x"></i>
+                                Review Applications
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

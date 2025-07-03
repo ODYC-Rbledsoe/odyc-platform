@@ -78,6 +78,30 @@
                             <i class="fas fa-calendar-check me-1"></i>Coordination
                         </a>
                     </li>
+                    {% elif current_user.is_employer() %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-building me-1"></i>Employer Portal
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('employer.dashboard') }}">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('employer.opportunities') }}">
+                                <i class="fas fa-briefcase me-2"></i>Opportunities
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('employer.applications') }}">
+                                <i class="fas fa-file-alt me-2"></i>Applications
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('employer.students') }}">
+                                <i class="fas fa-chart-line me-2"></i>Student Progress
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('employer.sponsorship') }}">
+                                <i class="fas fa-handshake me-2"></i>Sponsorship
+                            </a></li>
+                        </ul>
+                    </li>
                     {% endif %}
                 </ul>
                 

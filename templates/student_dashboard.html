@@ -151,6 +151,22 @@
                 </a>
             </div>
         </div>
+
+        <!-- Portfolio Generation -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-file-alt me-2"></i>Share Your Progress</h6>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Create a professional portfolio to share with employers and showcase your ODYC achievements.</p>
+                <a href="{{ url_for('employer.generate_portfolio') }}" class="btn btn-success btn-sm w-100">
+                    <i class="fas fa-download me-1"></i>Generate Portfolio
+                </a>
+                <div class="small text-muted mt-2">
+                    <i class="fas fa-shield-alt me-1"></i>Secure sharing with employers
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

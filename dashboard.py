@@ -14,6 +14,8 @@ def dashboard():
         return redirect(url_for('admin.admin_dashboard'))
     elif current_user.is_coordinator():
         return redirect(url_for('dashboard.coordinator_dashboard'))
+    elif current_user.is_employer():
+        return redirect(url_for('employer.dashboard'))
     elif current_user.is_student():
         return render_template('student_dashboard.html')
     elif current_user.is_mentor():

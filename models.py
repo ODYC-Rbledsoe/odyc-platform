@@ -28,6 +28,9 @@ class User(UserMixin, db.Model):
     
     def is_coordinator(self):
         return self.role == 'coordinator'
+    
+    def is_employer(self):
+        return self.role == 'employer'
 
 class MentorGroup(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -277,11 +280,179 @@ class EmployerPartner(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # New employer portal fields
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Portal login user
+    logo_url = db.Column(db.String(500))  # Company logo
+    description = db.Column(db.Text)  # Company description for students
+    benefits_offered = db.Column(db.Text)  # Benefits package information
+    company_culture = db.Column(db.Text)  # Culture description
+    annual_hires = db.Column(db.Integer, default=0)  # Annual hiring projections
+    internship_capacity = db.Column(db.Integer, default=0)  # Number of internships offered
+    mentor_capacity = db.Column(db.Integer, default=0)  # Available mentor slots
+    preferred_pathways = db.Column(db.Text)  # JSON list of preferred career pathway IDs
+    
     # Relationships
     industry = db.relationship('Industry', backref='employer_partners')
+    portal_user = db.relationship('User', foreign_keys=[user_id], backref='employer_profile')
     
     def __repr__(self):
         return f'<EmployerPartner {self.company_name}>'
+    
+    @property
+    def pathway_interests(self):
+        """Get list of career pathways this employer is interested in"""
+        if not self.preferred_pathways:
+            return []
+        import json
+        try:
+            pathway_ids = json.loads(self.preferred_pathways)
+            return CareerPathway.query.filter(CareerPathway.id.in_(pathway_ids)).all()
+        except:
+            return []
+
+class EmployerOpportunity(db.Model):
+    """Opportunities offered by employer partners"""
+    id = db.Column(db.Integer, primary_key=True)
+    employer_id = db.Column(db.Integer, db.ForeignKey('employer_partner.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)  # "Summer Internship Program"
+    opportunity_type = db.Column(db.String(50), nullable=False)  # internship, mentorship, job_shadow, apprenticeship
+    description = db.Column(db.Text, nullable=False)
+    requirements = db.Column(db.Text)  # Prerequisites and requirements
+    duration = db.Column(db.String(100))  # "10 weeks", "6 months", "ongoing"
+    compensation = db.Column(db.String(100))  # "$15/hour", "Unpaid", "Stipend"
+    positions_available = db.Column(db.Integer, default=1)
+    positions_filled = db.Column(db.Integer, default=0)
+    pathway_id = db.Column(db.Integer, db.ForeignKey('career_pathway.id'), nullable=True)  # Target pathway
+    application_deadline = db.Column(db.DateTime)
+    start_date = db.Column(db.DateTime)
+    end_date = db.Column(db.DateTime)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    employer = db.relationship('EmployerPartner', backref='opportunities')
+    pathway = db.relationship('CareerPathway', backref='opportunities')
+    
+    def __repr__(self):
+        return f'<EmployerOpportunity {self.title} at {self.employer.company_name}>'
+    
+    @property
+    def is_accepting_applications(self):
+        """Check if opportunity is still accepting applications"""
+        if not self.is_active:
+            return False
+        if self.application_deadline and self.application_deadline < datetime.utcnow():
+            return False
+        if self.positions_filled >= self.positions_available:
+            return False
+        return True
+
+class OpportunityApplication(db.Model):
+    """Student applications for employer opportunities"""
+    id = db.Column(db.Integer, primary_key=True)
+    opportunity_id = db.Column(db.Integer, db.ForeignKey('employer_opportunity.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    application_text = db.Column(db.Text, nullable=False)  # Cover letter/application
+    resume_data = db.Column(db.Text)  # JSON resume data or file path
+    status = db.Column(db.String(20), default='pending')  # pending, reviewed, accepted, rejected
+    employer_notes = db.Column(db.Text)  # Notes from employer
+    applied_at = db.Column(db.DateTime, default=datetime.utcnow)
+    reviewed_at = db.Column(db.DateTime)
+    
+    # Relationships
+    opportunity = db.relationship('EmployerOpportunity', backref='applications')
+    student = db.relationship('User', backref='opportunity_applications')
+    
+    def __repr__(self):
+        return f'<OpportunityApplication {self.student.name} -> {self.opportunity.title}>'
+
+class Sponsorship(db.Model):
+    """Tiered sponsorship model for employer investment"""
+    id = db.Column(db.Integer, primary_key=True)
+    employer_id = db.Column(db.Integer, db.ForeignKey('employer_partner.id'), nullable=False)
+    tier = db.Column(db.String(20), nullable=False)  # bronze, silver, gold, platinum
+    annual_amount = db.Column(db.Integer, nullable=False)  # Amount in dollars
+    start_date = db.Column(db.DateTime, default=datetime.utcnow)
+    end_date = db.Column(db.DateTime)
+    status = db.Column(db.String(20), default='pending')  # pending, active, expired, cancelled
+    
+    # Sponsorship benefits
+    branding_enabled = db.Column(db.Boolean, default=False)
+    dashboard_access = db.Column(db.Boolean, default=False)
+    early_talent_access = db.Column(db.Boolean, default=False)
+    curriculum_input = db.Column(db.Boolean, default=False)
+    exclusive_events = db.Column(db.Boolean, default=False)
+    candidate_matching = db.Column(db.Boolean, default=False)
+    
+    # Pathway focus
+    pathway_focus_id = db.Column(db.Integer, db.ForeignKey('career_pathway.id'), nullable=True)
+    
+    # Contact and billing
+    billing_contact = db.Column(db.String(100))
+    billing_email = db.Column(db.String(120))
+    notes = db.Column(db.Text)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    employer = db.relationship('EmployerPartner', backref='sponsorships')
+    pathway_focus = db.relationship('CareerPathway', backref='focused_sponsorships')
+    
+    def __repr__(self):
+        return f'<Sponsorship {self.employer.company_name} - {self.tier.title()}>'
+    
+    @property
+    def is_active(self):
+        return self.status == 'active' and (not self.end_date or self.end_date > datetime.utcnow())
+
+class StudentPortfolio(db.Model):
+    """Generated student portfolios for sharing with employers"""
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    title = db.Column(db.String(200), default='ODYC Student Portfolio')
+    
+    # Content flags
+    include_personal = db.Column(db.Boolean, default=True)
+    include_pathway = db.Column(db.Boolean, default=True)
+    include_curriculum = db.Column(db.Boolean, default=True)
+    include_sessions = db.Column(db.Boolean, default=True)
+    include_achievements = db.Column(db.Boolean, default=True)
+    include_recommendations = db.Column(db.Boolean, default=False)
+    
+    # Generated content
+    portfolio_data = db.Column(db.Text)  # JSON data of portfolio content
+    pdf_path = db.Column(db.String(500))  # Path to generated PDF
+    digital_url = db.Column(db.String(500))  # Public URL for digital view
+    access_token = db.Column(db.String(100))  # Token for secure access
+    
+    # Sharing settings
+    is_public = db.Column(db.Boolean, default=False)
+    shared_with_employers = db.Column(db.Text)  # JSON list of employer emails shared with
+    view_count = db.Column(db.Integer, default=0)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    expires_at = db.Column(db.DateTime)  # Optional expiration for security
+    
+    # Relationships
+    student = db.relationship('User', backref='portfolios')
+    
+    def __repr__(self):
+        return f'<StudentPortfolio {self.student.name} - {self.title}>'
+    
+    @property
+    def is_accessible(self):
+        """Check if portfolio is still accessible"""
+        if self.expires_at and self.expires_at < datetime.utcnow():
+            return False
+        return True
+    
+    def generate_access_url(self):
+        """Generate secure access URL for employers"""
+        if not self.access_token:
+            import secrets
+            self.access_token = secrets.token_urlsafe(32)
+        return f"/portfolio/{self.id}/{self.access_token}"
 
 # Keep the old Session model for backward compatibility
 class Session(db.Model):

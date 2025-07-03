@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, TextAreaField, SelectField, DateTimeField, SubmitField, IntegerField
-from wtforms.validators import DataRequired, Email, Length, EqualTo, NumberRange
+from wtforms import StringField, PasswordField, TextAreaField, SelectField, DateTimeField, SubmitField, IntegerField, BooleanField
+from wtforms.validators import DataRequired, Email, Length, EqualTo, NumberRange, URL, Optional
 from wtforms.widgets import DateTimeLocalInput
 from datetime import datetime
 
@@ -13,7 +13,8 @@ class RegistrationForm(FlaskForm):
     role = SelectField('Role', choices=[
         ('student', 'Student'),
         ('mentor', 'Mentor'),
-        ('coordinator', 'Mentor Coordinator')
+        ('coordinator', 'Mentor Coordinator'),
+        ('employer', 'Employer Partner')
     ], validators=[DataRequired()])
     bio = TextAreaField('Bio', validators=[Length(max=500)])
     interests_expertise = TextAreaField('Interests/Expertise', validators=[Length(max=500)])
@@ -127,3 +128,128 @@ class GroupProgressForm(FlaskForm):
     mentor_notes = TextAreaField('Notes', validators=[Length(max=1000)],
                                 render_kw={"placeholder": "Add notes about the group's progress..."})
     submit = SubmitField('Update Progress')
+
+# Employer Portal Forms
+class EmployerRegistrationForm(FlaskForm):
+    # User account fields
+    name = StringField('Your Full Name', validators=[DataRequired(), Length(min=2, max=100)])
+    email = StringField('Business Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    password2 = PasswordField('Confirm Password', validators=[
+        DataRequired(), EqualTo('password', message='Passwords must match')])
+    
+    # Company fields
+    company_name = StringField('Company Name', validators=[DataRequired(), Length(min=2, max=200)])
+    industry_id = SelectField('Industry', coerce=int, validators=[DataRequired()])
+    contact_phone = StringField('Phone Number', validators=[Optional(), Length(max=20)])
+    website = StringField('Company Website', validators=[Optional(), URL(), Length(max=200)])
+    address = TextAreaField('Company Address', validators=[Optional(), Length(max=500)])
+    employee_count = SelectField('Company Size', choices=[
+        ('1-10', '1-10 employees'),
+        ('11-50', '11-50 employees'),
+        ('51-200', '51-200 employees'),
+        ('201-500', '201-500 employees'),
+        ('500+', '500+ employees')
+    ], validators=[DataRequired()])
+    
+    # Business needs
+    description = TextAreaField('Company Description', validators=[Optional(), Length(max=1000)],
+                               render_kw={"placeholder": "Brief description of your company for students..."})
+    hiring_needs = TextAreaField('Current Hiring Needs', validators=[Optional(), Length(max=1000)],
+                                render_kw={"placeholder": "Describe your current and projected hiring needs..."})
+    annual_hires = IntegerField('Annual Hires (projected)', validators=[Optional(), NumberRange(min=0, max=1000)])
+    
+    submit = SubmitField('Register Company')
+
+class EmployerProfileForm(FlaskForm):
+    company_name = StringField('Company Name', validators=[DataRequired(), Length(min=2, max=200)])
+    industry_id = SelectField('Industry', coerce=int, validators=[DataRequired()])
+    contact_name = StringField('Primary Contact', validators=[DataRequired(), Length(min=2, max=100)])
+    contact_phone = StringField('Phone Number', validators=[Optional(), Length(max=20)])
+    website = StringField('Company Website', validators=[Optional(), URL(), Length(max=200)])
+    address = TextAreaField('Company Address', validators=[Optional(), Length(max=500)])
+    
+    description = TextAreaField('Company Description', validators=[Optional(), Length(max=1000)],
+                               render_kw={"rows": 4, "placeholder": "Tell students about your company..."})
+    company_culture = TextAreaField('Company Culture', validators=[Optional(), Length(max=1000)],
+                                   render_kw={"rows": 3, "placeholder": "Describe your workplace culture..."})
+    benefits_offered = TextAreaField('Benefits & Compensation', validators=[Optional(), Length(max=1000)],
+                                    render_kw={"rows": 3, "placeholder": "Benefits, salary ranges, perks..."})
+    
+    hiring_needs = TextAreaField('Hiring Needs', validators=[Optional(), Length(max=1000)],
+                                render_kw={"rows": 4, "placeholder": "Current and projected hiring needs..."})
+    annual_hires = IntegerField('Annual Hires', validators=[Optional(), NumberRange(min=0, max=1000)])
+    internship_capacity = IntegerField('Internship Positions Available', validators=[Optional(), NumberRange(min=0, max=100)])
+    mentor_capacity = IntegerField('Available Mentors', validators=[Optional(), NumberRange(min=0, max=50)])
+    
+    submit = SubmitField('Update Profile')
+
+class OpportunityForm(FlaskForm):
+    title = StringField('Opportunity Title', validators=[DataRequired(), Length(min=5, max=200)])
+    opportunity_type = SelectField('Type', choices=[
+        ('internship', 'Internship'),
+        ('apprenticeship', 'Apprenticeship'),
+        ('job_shadow', 'Job Shadow'),
+        ('mentorship', 'Mentorship Program'),
+        ('entry_level', 'Entry Level Position')
+    ], validators=[DataRequired()])
+    
+    description = TextAreaField('Description', validators=[DataRequired(), Length(min=50, max=2000)],
+                               render_kw={"rows": 6, "placeholder": "Detailed description of the opportunity..."})
+    requirements = TextAreaField('Requirements', validators=[Optional(), Length(max=1000)],
+                                render_kw={"rows": 4, "placeholder": "Prerequisites, skills, education requirements..."})
+    
+    pathway_id = SelectField('Target Career Pathway', coerce=int, validators=[Optional()])
+    duration = StringField('Duration', validators=[Optional(), Length(max=100)],
+                          render_kw={"placeholder": "e.g., 10 weeks, 6 months, ongoing"})
+    compensation = StringField('Compensation', validators=[Optional(), Length(max=100)],
+                              render_kw={"placeholder": "e.g., $15/hour, Unpaid, $500 stipend"})
+    
+    positions_available = IntegerField('Positions Available', validators=[DataRequired(), NumberRange(min=1, max=100)])
+    application_deadline = DateTimeField('Application Deadline', validators=[Optional()],
+                                        widget=DateTimeLocalInput())
+    start_date = DateTimeField('Start Date', validators=[Optional()], widget=DateTimeLocalInput())
+    end_date = DateTimeField('End Date', validators=[Optional()], widget=DateTimeLocalInput())
+    
+    submit = SubmitField('Post Opportunity')
+
+class SponsorshipForm(FlaskForm):
+    tier = SelectField('Sponsorship Tier', choices=[
+        ('bronze', 'Bronze - Basic Partner ($2,500/year)'),
+        ('silver', 'Silver - Talent Partner ($7,500/year)'),
+        ('gold', 'Gold - Strategic Partner ($15,000/year)'),
+        ('platinum', 'Platinum - Premier Partner ($25,000/year)')
+    ], validators=[DataRequired()])
+    
+    pathway_focus = SelectField('Primary Pathway Interest', coerce=int, validators=[Optional()])
+    branding_interest = BooleanField('Company branding on student materials')
+    early_access = BooleanField('Early access to graduating students')
+    curriculum_input = BooleanField('Input on curriculum development')
+    exclusive_events = BooleanField('Exclusive networking events')
+    
+    contact_name = StringField('Billing Contact', validators=[DataRequired(), Length(min=2, max=100)])
+    contact_email = StringField('Billing Email', validators=[DataRequired(), Email()])
+    
+    notes = TextAreaField('Additional Requests', validators=[Optional(), Length(max=1000)],
+                         render_kw={"placeholder": "Any specific needs or requests..."})
+    
+    submit = SubmitField('Submit Sponsorship Request')
+
+class StudentExportForm(FlaskForm):
+    include_personal = BooleanField('Include Personal Information', default=True)
+    include_pathway = BooleanField('Include Career Pathway Progress', default=True)
+    include_curriculum = BooleanField('Include Learning Modules', default=True)
+    include_sessions = BooleanField('Include Mentoring Sessions', default=True)
+    include_achievements = BooleanField('Include Certifications & Achievements', default=True)
+    include_recommendations = BooleanField('Include Mentor Recommendations', default=False)
+    
+    export_format = SelectField('Export Format', choices=[
+        ('pdf', 'PDF Portfolio'),
+        ('digital', 'Digital Profile Link'),
+        ('both', 'PDF + Digital Link')
+    ], default='pdf', validators=[DataRequired()])
+    
+    recipient_email = StringField('Share with Employer (Optional)', validators=[Optional(), Email()],
+                                 render_kw={"placeholder": "employer@company.com"})
+    
+    submit = SubmitField('Generate Portfolio')
