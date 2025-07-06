@@ -9,37 +9,228 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
     <style>
+        :root {
+            --odyc-primary: #ff6b35;
+            --odyc-secondary: #2b9348;
+            --odyc-accent: #004e89;
+            --odyc-light: #f9f9f9;
+            --odyc-text: #2c3e50;
+        }
+        
+        body {
+            background-color: var(--odyc-light);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            font-size: 16px;
+            color: var(--odyc-text);
+        }
+        
         .hero-section {
-            background: linear-gradient(135deg, rgba(0,123,255,0.1) 0%, rgba(108,117,125,0.1) 100%);
-            padding: 100px 0;
+            background: linear-gradient(135deg, var(--odyc-primary) 0%, var(--odyc-accent) 100%);
+            padding: 120px 0 80px;
+            color: white;
+            position: relative;
+            overflow: hidden;
         }
-        .value-card {
-            transition: transform 0.3s ease;
-            height: 100%;
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="rgba(255,255,255,0.1)" points="0,1000 1000,800 1000,1000"/></svg>') no-repeat bottom;
+            background-size: cover;
         }
-        .value-card:hover {
-            transform: translateY(-5px);
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
         }
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--bs-primary);
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            color: var(--odyc-text);
         }
-        .industry-icon {
+        
+        h1 {
             font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--bs-info);
+            margin-bottom: 1.5rem;
         }
+        
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.25rem;
+        }
+        
+        .lead {
+            font-size: 1.25rem;
+            font-weight: 400;
+        }
+        
+        .btn-primary {
+            background-color: var(--odyc-primary);
+            border-color: var(--odyc-primary);
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #e55a2b;
+            border-color: #e55a2b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+        
+        .btn-outline-primary {
+            color: var(--odyc-primary);
+            border-color: var(--odyc-primary);
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--odyc-primary);
+            border-color: var(--odyc-primary);
+            transform: translateY(-2px);
+        }
+        
+        .value-card {
+            transition: all 0.3s ease;
+            height: 100%;
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: white;
+        }
+        
+        .value-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--odyc-primary);
+        }
+        
+        .industry-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--odyc-secondary);
+        }
+        
         .pathway-card {
-            border-left: 4px solid var(--bs-primary);
+            border-left: 5px solid var(--odyc-primary);
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
         }
+        
+        .pathway-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        
+        .section-padding {
+            padding: 80px 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .section-header h2 {
+            color: var(--odyc-accent);
+        }
+        
+        .how-it-works-step {
+            text-align: center;
+            padding: 30px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .how-it-works-step:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        
+        .step-number {
+            background: var(--odyc-primary);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 auto 20px;
+        }
+        
+        .testimonial-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--odyc-secondary);
+        }
+        
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--odyc-primary) !important;
+        }
+        
+        .navbar-nav .nav-link {
+            font-weight: 500;
+            padding: 8px 16px !important;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            background-color: rgba(255, 107, 53, 0.1);
+            color: var(--odyc-primary) !important;
+        }
+        
+        .cta-section {
+            background: linear-gradient(135deg, var(--odyc-accent) 0%, var(--odyc-secondary) 100%);
+            color: white;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+        
+        .bg-primary { background-color: var(--odyc-primary) !important; }
+        .bg-success { background-color: var(--odyc-secondary) !important; }
+        .text-primary { color: var(--odyc-primary) !important; }
+        .text-success { color: var(--odyc-secondary) !important; }
+        .border-primary { border-color: var(--odyc-primary) !important; }
+        .border-success { border-color: var(--odyc-secondary) !important; }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
+            <a class="navbar-brand" href="/">
                 <i class="fas fa-compass me-2"></i>ODYC
             </a>
             
@@ -48,24 +239,24 @@
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
-                        <a class="nav-link" href="#about">About</a>
+                        <a class="nav-link" href="#hero">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#pathways">Career Pathways</a>
+                        <a class="nav-link" href="#how-it-works">How it Works</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#value">Benefits</a>
+                        <a class="nav-link" href="#pathways">Pathways</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#partners">Partners</a>
+                        <a class="nav-link" href="#testimonials">Stories</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link btn btn-outline-primary ms-2 px-3" href="{{ url_for('auth.login') }}">Login</a>
+                        <a class="nav-link btn btn-outline-primary ms-2" href="{{ url_for('auth.login') }}">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link btn btn-primary ms-2 px-3" href="{{ url_for('auth.register') }}">Join ODYC</a>
+                        <a class="nav-link btn btn-primary ms-2" href="{{ url_for('auth.register') }}">Join Pilot</a>
                     </li>
                 </ul>
             </div>
@@ -73,12 +264,12 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
+    <section id="hero" class="hero-section">
+        <div class="container hero-content">
             <div class="row align-items-center">
                 <div class="col-lg-6">
-                    <h1 class="display-4 fw-bold mb-4">Mentorship That Moves Students Forward.</h1>
-                    <p class="lead mb-4">ODYC connects students with industry professionals to explore real careers, build skills, and find purpose — starting right here in Wyoming.</p>
+                    <h1 class="display-4 fw-bold mb-4 text-white">Mentorship That Moves Students Forward.</h1>
+                    <p class="lead mb-4 text-white">ODYC connects students with industry professionals to explore real careers, build skills, and find purpose — starting right here in Wyoming.</p>
                     
                     <div class="row mb-4">
                         <div class="col-4 text-center">
@@ -143,8 +334,53 @@
         </div>
     </section>
 
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="display-5">How ODYC Works</h2>
+                <p class="lead">A clear path from exploration to employment</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="how-it-works-step">
+                        <div class="step-number">1</div>
+                        <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                        <h4>Join & Explore</h4>
+                        <p>Students join ODYC and explore career pathways aligned with Wyoming industries through assessment and interest surveys.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="how-it-works-step">
+                        <div class="step-number">2</div>
+                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                        <h4>Group Mentoring</h4>
+                        <p>Students are matched with industry mentors in small groups (5-6 students) for personalized guidance and skill building.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="how-it-works-step">
+                        <div class="step-number">3</div>
+                        <i class="fas fa-certificate fa-3x text-primary mb-3"></i>
+                        <h4>Skill Development</h4>
+                        <p>Students complete structured curriculum modules, earn industry credentials, and gain hands-on experience through projects.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="how-it-works-step">
+                        <div class="step-number">4</div>
+                        <i class="fas fa-briefcase fa-3x text-primary mb-3"></i>
+                        <h4>Career Launch</h4>
+                        <p>Students transition to internships, apprenticeships, or direct employment with partner companies in Southwest Wyoming.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- About Section -->
-    <section id="about" class="py-5">
+    <section id="about" class="section-padding bg-light">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 mx-auto text-center">
@@ -180,7 +416,7 @@
     </section>
 
     <!-- Career Pathways Section -->
-    <section id="pathways" class="py-5 bg-dark">
+    <section id="pathways" class="section-padding" style="background: linear-gradient(135deg, var(--odyc-accent) 0%, #1a365d 100%); color: white;">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 mx-auto text-center mb-5">
@@ -362,6 +598,72 @@
         </div>
     </section>
 
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="section-padding bg-light">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="display-5">What Students & Mentors Say</h2>
+                <p class="lead">Real voices from our ODYC community</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="testimonial-card">
+                        <div class="mb-3">
+                            <i class="fas fa-quote-left fa-2x text-primary"></i>
+                        </div>
+                        <p class="mb-3">"ODYC opened my eyes to career possibilities I never knew existed. My mentor at ExxonMobil showed me what it's really like working in the energy industry."</p>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary rounded-circle me-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Sarah M.</h6>
+                                <small class="text-muted">RSHS Senior, Electrical Pathway</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="testimonial-card">
+                        <div class="mb-3">
+                            <i class="fas fa-quote-left fa-2x text-primary"></i>
+                        </div>
+                        <p class="mb-3">"Mentoring with ODYC lets me give back to my community while helping shape Wyoming's future workforce. These students are incredibly motivated."</p>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success rounded-circle me-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user-tie text-white"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Mike Rodriguez</h6>
+                                <small class="text-muted">Process Operator, Industry Mentor</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="testimonial-card">
+                        <div class="mb-3">
+                            <i class="fas fa-quote-left fa-2x text-primary"></i>
+                        </div>
+                        <p class="mb-3">"The hands-on curriculum and real industry connections helped me land an apprenticeship before I even graduated. ODYC changed my life."</p>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning rounded-circle me-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; color: white;">
+                                <i class="fas fa-user text-dark"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Jake T.</h6>
+                                <small class="text-muted">WWCC Student, Maintenance Technician</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Partners Section -->
     <section id="partners" class="py-5 bg-dark">
         <div class="container">
@@ -432,18 +734,18 @@
     </section>
 
     <!-- Call to Action Section -->
-    <section class="py-5 bg-primary text-white">
+    <section class="cta-section section-padding">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-8">
-                    <h2 class="display-6 mb-3">Ready to Shape Southwest Wyoming's Future?</h2>
-                    <p class="lead mb-0">Join ODYC today and be part of a movement that's transforming workforce development through authentic industry partnerships and meaningful mentorship.</p>
+                    <h2 class="display-6 mb-3 text-white">Ready to Shape Southwest Wyoming's Future?</h2>
+                    <p class="lead mb-0 text-white">Join ODYC today and be part of a movement that's transforming workforce development through authentic industry partnerships and meaningful mentorship.</p>
                 </div>
                 <div class="col-lg-4 text-center">
-                    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg mb-2 d-block">
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg mb-3 d-block">
                         <i class="fas fa-rocket me-2"></i>Join the Pilot
                     </a>
-                    <a href="#about" class="btn btn-outline-light btn-lg mb-2 d-block">
+                    <a href="#how-it-works" class="btn btn-outline-light btn-lg mb-3 d-block">
                         <i class="fas fa-presentation-screen me-2"></i>Request a Demo
                     </a>
                     <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg d-block">
