@@ -149,7 +149,11 @@
         }
         
         .section-header h2 {
-            color: var(--odyc-accent);
+            color: var(--odyc-text);
+        }
+        
+        .section-dark .section-header h2 {
+            color: white;
         }
         
         .how-it-works-step {
@@ -200,11 +204,16 @@
             padding: 8px 16px !important;
             border-radius: 6px;
             transition: all 0.3s ease;
+            color: var(--odyc-text) !important;
         }
         
         .navbar-nav .nav-link:hover {
             background-color: rgba(255, 107, 53, 0.1);
             color: var(--odyc-primary) !important;
+        }
+        
+        .navbar-light .navbar-nav .nav-link {
+            color: var(--odyc-text) !important;
         }
         
         .cta-section {
@@ -224,6 +233,25 @@
         .text-success { color: var(--odyc-secondary) !important; }
         .border-primary { border-color: var(--odyc-primary) !important; }
         .border-success { border-color: var(--odyc-secondary) !important; }
+        
+        /* Ensure strong contrast for readability */
+        .value-card h6 {
+            font-weight: 600;
+        }
+        
+        .pathway-card h5 {
+            color: var(--odyc-text);
+            font-weight: 700;
+        }
+        
+        .pathway-card .card-text {
+            color: var(--odyc-text);
+        }
+        
+        .testimonial-card h6 {
+            color: var(--odyc-text);
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -273,16 +301,16 @@
                     
                     <div class="row mb-4">
                         <div class="col-4 text-center">
-                            <div class="stat-number">150+</div>
-                            <small class="text-muted">Students Served</small>
+                            <div class="stat-number text-white">150+</div>
+                            <small class="text-white-50">Students Served</small>
                         </div>
                         <div class="col-4 text-center">
-                            <div class="stat-number">25+</div>
-                            <small class="text-muted">Industry Mentors</small>
+                            <div class="stat-number text-white">25+</div>
+                            <small class="text-white-50">Industry Mentors</small>
                         </div>
                         <div class="col-4 text-center">
-                            <div class="stat-number">4</div>
-                            <small class="text-muted">Career Pathways</small>
+                            <div class="stat-number text-white">4</div>
+                            <small class="text-white-50">Career Pathways</small>
                         </div>
                     </div>
                     
@@ -416,13 +444,11 @@
     </section>
 
     <!-- Career Pathways Section -->
-    <section id="pathways" class="section-padding" style="background: linear-gradient(135deg, var(--odyc-accent) 0%, #1a365d 100%); color: white;">
+    <section id="pathways" class="section-padding section-dark" style="background: linear-gradient(135deg, var(--odyc-accent) 0%, #1a365d 100%); color: white;">
         <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto text-center mb-5">
-                    <h2 class="display-5 mb-4">Career Pathways That Lead Somewhere</h2>
-                    <p class="lead">Our pathways are designed with input from local employers and aligned with Western Wyoming Community College and Rock Springs High School programs.</p>
-                </div>
+            <div class="section-header">
+                <h2 class="display-5 mb-4 text-white">Career Pathways That Lead Somewhere</h2>
+                <p class="lead text-white">Our pathways are designed with input from local employers and aligned with Western Wyoming Community College and Rock Springs High School programs.</p>
             </div>
             
             <div class="row g-4">
