@@ -125,7 +125,6 @@
 
         <!-- Survey Form -->
         <form action="{{ url_for('survey.submit') }}" method="POST">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             
             <!-- Question 1: Learning Style -->
             <div class="question-card">
