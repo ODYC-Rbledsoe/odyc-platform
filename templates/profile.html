@@ -109,7 +109,7 @@
                         </p>
                         {% endif %}
                         
-                        <small class="text-muted">Member since {{ current_user.created_at.strftime('%B %Y') }}</small>
+                        <small class="text-muted">Member since {{ current_user.created_at.strftime('%B %Y') if current_user.created_at else 'Unknown' }}</small>
                     </div>
                 </div>
             </div>
