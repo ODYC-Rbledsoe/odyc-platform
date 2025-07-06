@@ -107,6 +107,15 @@ The application uses three main entities:
 - Future migrations should use Flask-Migrate
 
 ## Changelog
+- July 06, 2025: Created professional landing page for ODYC platform
+  - Built comprehensive homepage showcasing Southwest Wyoming workforce development mission
+  - Added value propositions for students, mentors, employers, and schools
+  - Featured authentic Southwest Wyoming career pathways with salary data and local job projections
+  - Included industry partner showcase (Genesis Alkali, Bridger Coal, Memorial Hospital, Wyoming Machine Works)
+  - Implemented responsive design with clear calls-to-action for registration and employer partnerships
+  - Added smooth scrolling navigation and professional branding aligned with ODYC identity
+  - Integrated authentication flow with seamless transitions to platform features
+
 - July 03, 2025: Implemented comprehensive employer portal features
   - Built complete employer portal with dashboard, profile management, and opportunity posting
   - Added tiered sponsorship model (Bronze $2.5K, Silver $7.5K, Gold $15K, Platinum $25K)

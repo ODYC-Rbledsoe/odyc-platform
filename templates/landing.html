@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ODYC - Southwest Wyoming Workforce Development</title>
+    <meta name="description" content="Connecting Southwest Wyoming students with industry professionals to build the workforce of tomorrow. Industry-led mentorship, career pathways, and real-world opportunities.">
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, rgba(0,123,255,0.1) 0%, rgba(108,117,125,0.1) 100%);
+            padding: 100px 0;
+        }
+        .value-card {
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+        .value-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--bs-primary);
+        }
+        .industry-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--bs-info);
+        }
+        .pathway-card {
+            border-left: 4px solid var(--bs-primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-industry me-2"></i>ODYC
+                <small class="text-muted ms-2">Southwest Wyoming Workforce Development</small>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#pathways">Career Pathways</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#value">Benefits</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#partners">Partners</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-primary ms-2 px-3" href="{{ url_for('auth.login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-primary ms-2 px-3" href="{{ url_for('auth.register') }}">Join ODYC</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">Mentorship That Moves Students Forward.</h1>
+                    <p class="lead mb-4">ODYC connects students with industry professionals to explore real careers, build skills, and find purpose — starting right here in Wyoming.</p>
+                    
+                    <div class="row mb-4">
+                        <div class="col-4 text-center">
+                            <div class="stat-number">150+</div>
+                            <small class="text-muted">Students Served</small>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="stat-number">25+</div>
+                            <small class="text-muted">Industry Mentors</small>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="stat-number">4</div>
+                            <small class="text-muted">Career Pathways</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-rocket me-2"></i>Join the Pilot
+                        </a>
+                        <a href="#about" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-presentation-screen me-2"></i>Request a Demo
+                        </a>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Log In
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="card bg-primary text-white text-center p-3">
+                                <i class="fas fa-users fa-2x mb-2"></i>
+                                <h6>Group Mentoring</h6>
+                                <small>5-6 students per industry mentor</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-info text-white text-center p-3">
+                                <i class="fas fa-certificate fa-2x mb-2"></i>
+                                <h6>Industry Credentials</h6>
+                                <small>OSHA-10, ISA standards, dual enrollment</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-success text-white text-center p-3">
+                                <i class="fas fa-briefcase fa-2x mb-2"></i>
+                                <h6>Real Opportunities</h6>
+                                <small>Internships, apprenticeships, job placement</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-warning text-dark text-center p-3">
+                                <i class="fas fa-map-marked-alt fa-2x mb-2"></i>
+                                <h6>Local Focus</h6>
+                                <small>Southwest Wyoming industries</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h2 class="display-5 mb-4">Industry-Led, Community-Supported</h2>
+                    <p class="lead">ODYC is modeled after the Southwest Wyoming Manufacturing Partnership — a coalition built on the principle of being industry-led and community-supported. We transform regional workforce development by creating personalized career roadmaps built around real-world job roles identified by local employers.</p>
+                </div>
+            </div>
+            
+            <div class="row mt-5 g-4">
+                <div class="col-md-4 text-center">
+                    <div class="industry-icon">
+                        <i class="fas fa-industry"></i>
+                    </div>
+                    <h4>Manufacturing & Energy</h4>
+                    <p>Electrical technicians, process operators, and maintenance specialists for Wyoming's energy sector.</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="industry-icon">
+                        <i class="fas fa-hospital"></i>
+                    </div>
+                    <h4>Healthcare</h4>
+                    <p>Medical assistants, pharmacy technicians, and healthcare support roles serving rural communities.</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="industry-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <h4>Transportation & Logistics</h4>
+                    <p>CDL training, logistics coordination, and supply chain management for regional commerce.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Career Pathways Section -->
+    <section id="pathways" class="py-5 bg-dark">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center mb-5">
+                    <h2 class="display-5 mb-4">Career Pathways That Lead Somewhere</h2>
+                    <p class="lead">Our pathways are designed with input from local employers and aligned with Western Wyoming Community College and Rock Springs High School programs.</p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="card pathway-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-bolt fa-2x text-primary me-3"></i>
+                                <h5 class="mb-0">Electrical & Instrumentation Technician</h5>
+                            </div>
+                            <p class="card-text">Master electrical systems, instrumentation, and automation in industrial settings. Partner with Genesis Alkali and regional energy companies.</p>
+                            <div class="mt-auto">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <strong>$65,000</strong>
+                                        <br><small class="text-muted">Starting Salary</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <strong>25</strong>
+                                        <br><small class="text-muted">Local Openings</small>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <span class="badge bg-primary me-1">OSHA-10</span>
+                                    <span class="badge bg-info me-1">ISA Standards</span>
+                                    <span class="badge bg-success">WWCC Dual Enrollment</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card pathway-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-cogs fa-2x text-primary me-3"></i>
+                                <h5 class="mb-0">Process Operator</h5>
+                            </div>
+                            <p class="card-text">Operate and monitor industrial processes in chemical plants, refineries, and manufacturing facilities across Southwest Wyoming.</p>
+                            <div class="mt-auto">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <strong>$70,000</strong>
+                                        <br><small class="text-muted">Starting Salary</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <strong>35</strong>
+                                        <br><small class="text-muted">Local Openings</small>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <span class="badge bg-primary me-1">Hazmat Certified</span>
+                                    <span class="badge bg-warning text-dark me-1">Emergency Response</span>
+                                    <span class="badge bg-success">Industry Partnership</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card pathway-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-wrench fa-2x text-primary me-3"></i>
+                                <h5 class="mb-0">Mechanical Maintenance Technician</h5>
+                            </div>
+                            <p class="card-text">Maintain and repair industrial equipment, machinery, and systems. High demand across manufacturing and energy sectors.</p>
+                            <div class="mt-auto">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <strong>$62,000</strong>
+                                        <br><small class="text-muted">Starting Salary</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <strong>20</strong>
+                                        <br><small class="text-muted">Local Openings</small>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <span class="badge bg-primary me-1">Hydraulics/Pneumatics</span>
+                                    <span class="badge bg-info me-1">CMMS</span>
+                                    <span class="badge bg-success">Preventive Maintenance</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Value Proposition Section -->
+    <section id="value" class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center mb-5">
+                    <h2 class="display-5 mb-4">Value for Everyone</h2>
+                    <p class="lead">ODYC creates win-win relationships that benefit students, mentors, employers, and schools.</p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="card value-card border-primary">
+                        <div class="card-body text-center">
+                            <i class="fas fa-compass fa-3x text-primary mb-3"></i>
+                            <h5>For Students</h5>
+                            <h6 class="text-primary mb-3">"Find your path. Build your future."</h6>
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success me-2"></i>Real-world experience</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Industry mentorship</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Career clarity</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Job placement assistance</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Dual enrollment credits</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="card value-card border-info">
+                        <div class="card-body text-center">
+                            <i class="fas fa-chalkboard-teacher fa-3x text-info mb-3"></i>
+                            <h5>For Mentors</h5>
+                            <h6 class="text-info mb-3">"Give back. Guide the next generation."</h6>
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success me-2"></i>Develop future workforce</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Share expertise</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Professional development</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Community impact</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Leadership opportunities</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="card value-card border-success">
+                        <div class="card-body text-center">
+                            <i class="fas fa-industry fa-3x text-success mb-3"></i>
+                            <h5>For Employers</h5>
+                            <h6 class="text-success mb-3">"Grow your future workforce."</h6>
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success me-2"></i>Pre-trained candidates</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Reduced hiring risk</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Local talent retention</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Workforce planning</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Community partnerships</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="card value-card border-warning">
+                        <div class="card-body text-center">
+                            <i class="fas fa-school fa-3x text-warning mb-3"></i>
+                            <h5>For Schools</h5>
+                            <h6 class="text-warning mb-3">"Bring purpose-driven career readiness to your district."</h6>
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success me-2"></i>Industry alignment</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Student engagement</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Career readiness</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Community connections</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Workforce outcomes</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Partners Section -->
+    <section id="partners" class="py-5 bg-dark">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center mb-5">
+                    <h2 class="display-5 mb-4">Trusted by Southwest Wyoming Leaders</h2>
+                    <p class="lead">Our industry partners provide mentorship, internships, and career opportunities for ODYC students.</p>
+                </div>
+            </div>
+            
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-3 col-md-6 text-center">
+                    <div class="card bg-transparent border-0">
+                        <div class="card-body">
+                            <i class="fas fa-industry fa-3x text-primary mb-3"></i>
+                            <h6>Genesis Alkali</h6>
+                            <small class="text-muted">Chemical Manufacturing</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 text-center">
+                    <div class="card bg-transparent border-0">
+                        <div class="card-body">
+                            <i class="fas fa-mountain fa-3x text-warning mb-3"></i>
+                            <h6>Bridger Coal Company</h6>
+                            <small class="text-muted">Energy & Mining</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 text-center">
+                    <div class="card bg-transparent border-0">
+                        <div class="card-body">
+                            <i class="fas fa-hospital fa-3x text-success mb-3"></i>
+                            <h6>Memorial Hospital</h6>
+                            <small class="text-muted">Healthcare Services</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 text-center">
+                    <div class="card bg-transparent border-0">
+                        <div class="card-body">
+                            <i class="fas fa-cogs fa-3x text-info mb-3"></i>
+                            <h6>Wyoming Machine Works</h6>
+                            <small class="text-muted">Manufacturing</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-5">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h5 class="mb-3">Educational Partners</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <i class="fas fa-university fa-2x text-primary mb-2"></i>
+                            <h6>Western Wyoming Community College</h6>
+                            <small class="text-muted">Dual enrollment and technical programs</small>
+                        </div>
+                        <div class="col-md-6">
+                            <i class="fas fa-school fa-2x text-info mb-2"></i>
+                            <h6>Rock Springs High School</h6>
+                            <small class="text-muted">CTE Academy integration</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="py-5 bg-primary text-white">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h2 class="display-6 mb-3">Ready to Shape Southwest Wyoming's Future?</h2>
+                    <p class="lead mb-0">Join ODYC today and be part of a movement that's transforming workforce development through authentic industry partnerships and meaningful mentorship.</p>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg mb-2 d-block">
+                        <i class="fas fa-rocket me-2"></i>Join the Pilot
+                    </a>
+                    <a href="#about" class="btn btn-outline-light btn-lg mb-2 d-block">
+                        <i class="fas fa-presentation-screen me-2"></i>Request a Demo
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg d-block">
+                        <i class="fas fa-sign-in-alt me-2"></i>Log In
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-center py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h6><i class="fas fa-industry me-2"></i>ODYC</h6>
+                    <p class="small text-muted">Southwest Wyoming Workforce Development</p>
+                </div>
+                <div class="col-md-4">
+                    <h6>Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('auth.login') }}" class="text-muted">Login</a></li>
+                        <li><a href="{{ url_for('auth.register') }}" class="text-muted">Register</a></li>
+                        <li><a href="{{ url_for('career.explore_pathways') }}" class="text-muted">Career Pathways</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6>Contact</h6>
+                    <p class="small text-muted">Building the workforce of tomorrow, today.</p>
+                </div>
+            </div>
+            <hr class="my-3">
+            <p class="mb-0 text-muted">&copy; 2025 ODYC - Southwest Wyoming Workforce Development. Connecting minds, building futures.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
