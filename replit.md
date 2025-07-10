@@ -109,7 +109,7 @@ The application uses three main entities:
 ## Changelog
 - July 10, 2025: Updated trusted partners section in landing page
   - Changed "Memorial Hospital" to "Sweetwater Memorial" for healthcare services
-  - Updated "Wyoming Machine Works" to "WeSoda, Tata, Church & Dwight" for manufacturing
+  - Updated manufacturing section to "Manufacturing & Mining" with partners "WeSoda, Tata, Church & Dwight, Simplot"
   - Added Union Wireless as telecommunications partner with signal icon
   - Added Green River High School as education partner alongside WWCC and Rock Springs High School
   - Reorganized industry partner layout to accommodate 5 partners in balanced grid
