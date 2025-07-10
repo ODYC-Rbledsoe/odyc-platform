@@ -107,6 +107,12 @@ The application uses three main entities:
 - Future migrations should use Flask-Migrate
 
 ## Changelog
+- July 10, 2025: Updated trusted partners section in landing page
+  - Changed "Memorial Hospital" to "Sweetwater Memorial" for healthcare services
+  - Updated "Wyoming Machine Works" to "WeSoda, Tata, Church & Dwight" for manufacturing
+  - Added Union Wireless as telecommunications partner with signal icon
+  - Added Green River High School as education partner alongside WWCC and Rock Springs High School
+  - Reorganized industry partner layout to accommodate 5 partners in balanced grid
 - July 06, 2025: Created professional landing page for ODYC platform
   - Built comprehensive homepage showcasing Southwest Wyoming workforce development mission
   - Added value propositions for students, mentors, employers, and schools
