@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app import db
-from models import User, Match, Session, MentorGroup, GroupMembership, GroupSession
-from forms import MatchForm, CreateGroupForm, AddStudentToGroupForm
+from datetime import datetime
+from models import User, Match, Session, MentorGroup, GroupMembership, GroupSession, CareerCluster, CareerPathway, PathwayCluster
+from forms import MatchForm, CreateGroupForm, AddStudentToGroupForm, ClusterForm, PathwayClusterMappingForm
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -257,3 +258,140 @@ def remove_student_from_group(membership_id):
     
     flash(f'{student_name} removed from group successfully!', 'success')
     return redirect(url_for('admin.view_group', group_id=group_id))
+
+# Career Cluster Management Routes
+@admin_bp.route('/admin/clusters')
+@login_required
+def manage_clusters():
+    """Manage career clusters"""
+    if not current_user.is_admin():
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('dashboard.dashboard'))
+    
+    clusters = CareerCluster.query.order_by(CareerCluster.sort_order, CareerCluster.name).all()
+    return render_template('admin/manage_clusters.html', clusters=clusters)
+
+@admin_bp.route('/admin/clusters/new', methods=['GET', 'POST'])
+@login_required
+def create_cluster():
+    """Create new career cluster"""
+    if not current_user.is_admin():
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('dashboard.dashboard'))
+    
+    form = ClusterForm()
+    if form.validate_on_submit():
+        cluster = CareerCluster(
+            name=form.name.data,
+            description=form.description.data,
+            color_code=form.color_code.data,
+            icon_class=form.icon_class.data,
+            is_cross_cutting=form.is_cross_cutting.data,
+            is_priority_local=form.is_priority_local.data,
+            is_active=form.is_active.data,
+            sort_order=form.sort_order.data
+        )
+        db.session.add(cluster)
+        db.session.commit()
+        
+        flash(f'Career cluster "{cluster.name}" created successfully!', 'success')
+        return redirect(url_for('admin.manage_clusters'))
+    
+    return render_template('admin/cluster_form.html', form=form, title='Create Career Cluster')
+
+@admin_bp.route('/admin/clusters/<int:cluster_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_cluster(cluster_id):
+    """Edit existing career cluster"""
+    if not current_user.is_admin():
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('dashboard.dashboard'))
+    
+    cluster = CareerCluster.query.get_or_404(cluster_id)
+    form = ClusterForm(obj=cluster)
+    
+    if form.validate_on_submit():
+        form.populate_obj(cluster)
+        cluster.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        flash(f'Career cluster "{cluster.name}" updated successfully!', 'success')
+        return redirect(url_for('admin.manage_clusters'))
+    
+    return render_template('admin/cluster_form.html', form=form, cluster=cluster, title='Edit Career Cluster')
+
+@admin_bp.route('/admin/clusters/<int:cluster_id>/toggle-active')
+@login_required
+def toggle_cluster_active(cluster_id):
+    """Toggle cluster active status"""
+    if not current_user.is_admin():
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('dashboard.dashboard'))
+    
+    cluster = CareerCluster.query.get_or_404(cluster_id)
+    cluster.is_active = not cluster.is_active
+    cluster.updated_at = datetime.utcnow()
+    db.session.commit()
+    
+    status = 'activated' if cluster.is_active else 'deactivated'
+    flash(f'Career cluster "{cluster.name}" {status} successfully!', 'success')
+    return redirect(url_for('admin.manage_clusters'))
+
+@admin_bp.route('/admin/pathway-clusters')
+@login_required
+def manage_pathway_clusters():
+    """Manage pathway-cluster mappings"""
+    if not current_user.is_admin():
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('dashboard.dashboard'))
+    
+    mappings = PathwayCluster.query.join(CareerPathway).join(CareerCluster).all()
+    form = PathwayClusterMappingForm()
+    
+    # Populate dropdown choices
+    form.pathway_id.choices = [(p.id, p.name) for p in CareerPathway.query.filter_by(is_active=True).all()]
+    form.cluster_id.choices = [(c.id, c.name) for c in CareerCluster.query.filter_by(is_active=True).all()]
+    
+    if form.validate_on_submit():
+        # Check if mapping already exists
+        existing = PathwayCluster.query.filter_by(
+            pathway_id=form.pathway_id.data,
+            cluster_id=form.cluster_id.data
+        ).first()
+        
+        if existing:
+            flash('This pathway-cluster mapping already exists!', 'warning')
+        else:
+            mapping = PathwayCluster(
+                pathway_id=form.pathway_id.data,
+                cluster_id=form.cluster_id.data,
+                is_primary=form.is_primary.data
+            )
+            db.session.add(mapping)
+            db.session.commit()
+            
+            pathway = CareerPathway.query.get(form.pathway_id.data)
+            cluster = CareerCluster.query.get(form.cluster_id.data)
+            flash(f'Mapped "{pathway.name}" to "{cluster.name}" successfully!', 'success')
+        
+        return redirect(url_for('admin.manage_pathway_clusters'))
+    
+    return render_template('admin/pathway_clusters.html', mappings=mappings, form=form)
+
+@admin_bp.route('/admin/pathway-clusters/<int:mapping_id>/delete')
+@login_required
+def delete_pathway_cluster(mapping_id):
+    """Delete pathway-cluster mapping"""
+    if not current_user.is_admin():
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('dashboard.dashboard'))
+    
+    mapping = PathwayCluster.query.get_or_404(mapping_id)
+    pathway_name = mapping.pathway.name
+    cluster_name = mapping.cluster.name
+    
+    db.session.delete(mapping)
+    db.session.commit()
+    
+    flash(f'Removed mapping between "{pathway_name}" and "{cluster_name}".', 'success')
+    return redirect(url_for('admin.manage_pathway_clusters'))

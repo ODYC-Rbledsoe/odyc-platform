@@ -49,6 +49,13 @@
                             <li><a class="dropdown-item" href="{{ url_for('curriculum.manage_curriculum') }}">
                                 <i class="fas fa-book me-2"></i>Curriculum
                             </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.manage_clusters') }}">
+                                <i class="fas fa-map me-2"></i>Career Clusters
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.manage_pathway_clusters') }}">
+                                <i class="fas fa-link me-2"></i>Pathway Mappings
+                            </a></li>
                         </ul>
                     </li>
                     {% elif current_user.is_mentor() %}

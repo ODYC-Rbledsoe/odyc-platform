@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, TextAreaField, SelectField, DateTimeField, SubmitField, IntegerField, BooleanField
+from wtforms import StringField, PasswordField, TextAreaField, SelectField, DateTimeField, SubmitField, IntegerField, BooleanField, HiddenField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, NumberRange, URL, Optional
 from wtforms.widgets import DateTimeLocalInput
 from datetime import datetime
@@ -253,3 +253,28 @@ class StudentExportForm(FlaskForm):
                                  render_kw={"placeholder": "employer@company.com"})
     
     submit = SubmitField('Generate Portfolio')
+
+# Career Cluster Management Forms
+class ClusterForm(FlaskForm):
+    name = StringField('Cluster Name', validators=[DataRequired(), Length(min=2, max=100)],
+                      render_kw={"placeholder": "e.g., Advanced Manufacturing"})
+    description = TextAreaField('Description', validators=[DataRequired(), Length(min=10, max=1000)],
+                               render_kw={"rows": 4, "placeholder": "Detailed description of this career cluster..."})
+    color_code = StringField('Color Code', validators=[Optional(), Length(max=7)],
+                            render_kw={"placeholder": "#FF6B35", "type": "color"})
+    icon_class = StringField('Icon Class', validators=[Optional(), Length(max=50)],
+                           render_kw={"placeholder": "fas fa-industry"})
+    is_cross_cutting = BooleanField('Cross-Cutting Skills', 
+                                   description="Mark if this represents cross-cutting skills like Digital Technology")
+    is_priority_local = BooleanField('Local Priority', 
+                                   description="High priority for Southwest Wyoming region")
+    is_active = BooleanField('Active', default=True, description="Deactivate to hide from students")
+    sort_order = IntegerField('Sort Order', validators=[Optional(), NumberRange(min=0, max=100)], default=0)
+    submit = SubmitField('Save Cluster')
+
+class PathwayClusterMappingForm(FlaskForm):
+    pathway_id = SelectField('Career Pathway', coerce=int, validators=[DataRequired()])
+    cluster_id = SelectField('Career Cluster', coerce=int, validators=[DataRequired()])
+    is_primary = BooleanField('Primary Association', default=True,
+                            description="Primary vs secondary cluster association")
+    submit = SubmitField('Add Mapping')

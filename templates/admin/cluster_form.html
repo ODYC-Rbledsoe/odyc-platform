@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2">{{ title }}</h1>
+                <a href="{{ url_for('admin.manage_clusters') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Clusters
+                </a>
+            </div>
+            
+            <!-- Form -->
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    {{ form.name.label(class="form-label") }}
+                                    {{ form.name(class="form-control") }}
+                                    {% if form.name.errors %}
+                                        <div class="text-danger small">{{ form.name.errors[0] }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.sort_order.label(class="form-label") }}
+                                    {{ form.sort_order(class="form-control") }}
+                                    <div class="form-text">Lower numbers appear first</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control") }}
+                            {% if form.description.errors %}
+                                <div class="text-danger small">{{ form.description.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.color_code.label(class="form-label") }}
+                                    <div class="input-group">
+                                        {{ form.color_code(class="form-control") }}
+                                        <span class="input-group-text">
+                                            <div id="color-preview" style="width: 20px; height: 20px; border-radius: 50%; background-color: {{ form.color_code.data or '#6c757d' }};"></div>
+                                        </span>
+                                    </div>
+                                    <div class="form-text">Hex color code for visual branding</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.icon_class.label(class="form-label") }}
+                                    <div class="input-group">
+                                        {{ form.icon_class(class="form-control") }}
+                                        <span class="input-group-text">
+                                            <i id="icon-preview" class="{{ form.icon_class.data or 'fas fa-question' }}"></i>
+                                        </span>
+                                    </div>
+                                    <div class="form-text">Font Awesome icon class (e.g., fas fa-industry)</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Checkboxes -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Cluster Properties</label>
+                                    <div class="form-check">
+                                        {{ form.is_active(class="form-check-input") }}
+                                        {{ form.is_active.label(class="form-check-label") }}
+                                        <div class="form-text">{{ form.is_active.description }}</div>
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form.is_priority_local(class="form-check-input") }}
+                                        {{ form.is_priority_local.label(class="form-check-label") }}
+                                        <div class="form-text">{{ form.is_priority_local.description }}</div>
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form.is_cross_cutting(class="form-check-input") }}
+                                        {{ form.is_cross_cutting.label(class="form-check-label") }}
+                                        <div class="form-text">{{ form.is_cross_cutting.description }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                {% if cluster %}
+                                <div class="mb-3">
+                                    <label class="form-label">Preview</label>
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <div class="rounded-circle bg-white d-inline-flex align-items-center justify-content-center mb-2" style="width: 60px; height: 60px;">
+                                                <i id="live-icon" class="{{ form.icon_class.data or 'fas fa-question' }} fa-2x" style="color: {{ form.color_code.data or '#6c757d' }};"></i>
+                                            </div>
+                                            <h6 id="live-name">{{ form.name.data or 'Cluster Name' }}</h6>
+                                            <small class="text-muted" id="live-description">{{ form.description.data[:50] or 'Description...' }}{% if form.description.data and form.description.data|length > 50 %}...{% endif %}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{{ url_for('admin.manage_clusters') }}" class="btn btn-outline-secondary">Cancel</a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Live preview updates
+document.addEventListener('DOMContentLoaded', function() {
+    const colorInput = document.getElementById('color_code');
+    const iconInput = document.getElementById('icon_class');
+    const nameInput = document.getElementById('name');
+    const descInput = document.getElementById('description');
+    
+    const colorPreview = document.getElementById('color-preview');
+    const iconPreview = document.getElementById('icon-preview');
+    const liveIcon = document.getElementById('live-icon');
+    const liveName = document.getElementById('live-name');
+    const liveDesc = document.getElementById('live-description');
+    
+    if (colorInput && colorPreview) {
+        colorInput.addEventListener('input', function() {
+            colorPreview.style.backgroundColor = this.value || '#6c757d';
+            if (liveIcon) liveIcon.style.color = this.value || '#6c757d';
+        });
+    }
+    
+    if (iconInput && iconPreview) {
+        iconInput.addEventListener('input', function() {
+            iconPreview.className = this.value || 'fas fa-question';
+            if (liveIcon) liveIcon.className = (this.value || 'fas fa-question') + ' fa-2x';
+        });
+    }
+    
+    if (nameInput && liveName) {
+        nameInput.addEventListener('input', function() {
+            liveName.textContent = this.value || 'Cluster Name';
+        });
+    }
+    
+    if (descInput && liveDesc) {
+        descInput.addEventListener('input', function() {
+            const text = this.value || 'Description...';
+            liveDesc.textContent = text.length > 50 ? text.substring(0, 50) + '...' : text;
+        });
+    }
+});
+</script>
+{% endblock %}

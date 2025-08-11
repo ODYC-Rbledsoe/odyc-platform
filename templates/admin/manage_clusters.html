@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Career Clusters{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 mb-1">Career Clusters Management</h1>
+                    <p class="text-muted mb-0">Configure the career taxonomy system for dynamic cluster management</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('admin.create_cluster') }}" class="btn btn-primary me-2">
+                        <i class="fas fa-plus me-1"></i>Add Cluster
+                    </a>
+                    <a href="{{ url_for('admin.manage_pathway_clusters') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-link me-1"></i>Pathway Mappings
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Stats Summary -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h3 class="mb-0">{{ clusters|length }}</h3>
+                            <small>Total Clusters</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h3 class="mb-0">{{ clusters|selectattr('is_active')|list|length }}</h3>
+                            <small>Active Clusters</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-dark">
+                        <div class="card-body text-center">
+                            <h3 class="mb-0">{{ clusters|selectattr('is_priority_local')|list|length }}</h3>
+                            <small>Local Priority</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-secondary text-white">
+                        <div class="card-body text-center">
+                            <h3 class="mb-0">{{ clusters|selectattr('is_cross_cutting')|list|length }}</h3>
+                            <small>Cross-Cutting</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Clusters Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Career Clusters</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if clusters %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Cluster</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Last Updated</th>
+                                    <th width="200">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cluster in clusters %}
+                                <tr class="{% if not cluster.is_active %}table-secondary{% endif %}">
+                                    <td>
+                                        <span class="badge bg-light text-dark">{{ cluster.sort_order }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if cluster.icon_class %}
+                                            <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center me-3" style="width: 35px; height: 35px;">
+                                                <i class="{{ cluster.icon_class }}" style="color: {{ cluster.color_code or '#6c757d' }};"></i>
+                                            </div>
+                                            {% endif %}
+                                            <div>
+                                                <strong>{{ cluster.name }}</strong>
+                                                <br><small class="text-muted">{{ cluster.description[:60] }}{% if cluster.description|length > 60 %}...{% endif %}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if cluster.is_cross_cutting %}
+                                        <span class="badge bg-info">Cross-Cutting</span>
+                                        {% endif %}
+                                        {% if cluster.is_priority_local %}
+                                        <span class="badge bg-warning text-dark">Local Priority</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if cluster.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {% if cluster.updated_at %}
+                                            {{ cluster.updated_at.strftime('%m/%d/%Y') }}
+                                            {% else %}
+                                            {{ cluster.created_at.strftime('%m/%d/%Y') }}
+                                            {% endif %}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{{ url_for('admin.edit_cluster', cluster_id=cluster.id) }}" 
+                                               class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{{ url_for('admin.toggle_cluster_active', cluster_id=cluster.id) }}" 
+                                               class="btn {% if cluster.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %} btn-sm"
+                                               onclick="return confirm('Are you sure you want to {% if cluster.is_active %}deactivate{% else %}activate{% endif %} this cluster?')">
+                                                <i class="fas {% if cluster.is_active %}fa-pause{% else %}fa-play{% endif %}"></i>
+                                            </a>
+                                            <a href="{{ url_for('career_clusters.cluster_detail', cluster_id=cluster.id) }}" 
+                                               class="btn btn-outline-info btn-sm" target="_blank">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-map fa-3x text-muted mb-3"></i>
+                        <h5>No Career Clusters</h5>
+                        <p class="text-muted">Get started by creating your first career cluster.</p>
+                        <a href="{{ url_for('admin.create_cluster') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Create First Cluster
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Help Section -->
+            <div class="row mt-4">
+                <div class="col-md-8">
+                    <div class="card border-info">
+                        <div class="card-body">
+                            <h6 class="text-info">
+                                <i class="fas fa-info-circle me-1"></i>Career Cluster Guidelines
+                            </h6>
+                            <ul class="small mb-0">
+                                <li><strong>Cross-Cutting:</strong> Mark clusters that represent skills used across multiple industries (e.g., Digital Technology, Entrepreneurship)</li>
+                                <li><strong>Local Priority:</strong> Designate clusters with high demand in Southwest Wyoming</li>
+                                <li><strong>Sort Order:</strong> Control display order (lower numbers appear first)</li>
+                                <li><strong>Active Status:</strong> Only active clusters are visible to students and in pathway mappings</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-warning">
+                        <div class="card-body">
+                            <h6 class="text-warning">
+                                <i class="fas fa-exclamation-triangle me-1"></i>State Alignment
+                            </h6>
+                            <p class="small mb-0">This system allows ODYC to adapt to Wyoming's career cluster adoption without code changes. Configure clusters to match your state's final framework.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -182,14 +182,18 @@ class StudentProgress(db.Model):
         return f'<StudentProgress {self.student.name} - {self.module.title}>'
 
 class CareerCluster(db.Model):
-    """National Career Clusters Framework - 14 official clusters"""
+    """Dynamic Career Clusters - configurable through admin UI"""
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)  # e.g., "Advanced Manufacturing"
     description = db.Column(db.Text)
     color_code = db.Column(db.String(10))  # Hex color for UI consistency
     icon_class = db.Column(db.String(50))  # Font Awesome icon class
+    is_cross_cutting = db.Column(db.Boolean, default=False)  # Cross-cutting skills like Digital Technology
     is_priority_local = db.Column(db.Boolean, default=False)  # Priority for Southwest Wyoming
+    is_active = db.Column(db.Boolean, default=True)  # Allow deactivation without deletion
+    sort_order = db.Column(db.Integer, default=0)  # Display ordering
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     def __repr__(self):
         return f'<CareerCluster {self.name}>'
@@ -261,6 +265,24 @@ class PathwayModule(db.Model):
     
     def __repr__(self):
         return f'<PathwayModule {self.pathway.name} - {self.module.title}>'
+
+class PathwayCluster(db.Model):
+    """Many-to-many mapping between career pathways and clusters"""
+    id = db.Column(db.Integer, primary_key=True)
+    pathway_id = db.Column(db.Integer, db.ForeignKey('career_pathway.id'), nullable=False)
+    cluster_id = db.Column(db.Integer, db.ForeignKey('career_cluster.id'), nullable=False)
+    is_primary = db.Column(db.Boolean, default=True)  # Primary vs secondary cluster association
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    pathway = db.relationship('CareerPathway', backref='cluster_associations')
+    cluster = db.relationship('CareerCluster', backref='pathway_associations')
+    
+    # Unique constraint to prevent duplicate associations
+    __table_args__ = (db.UniqueConstraint('pathway_id', 'cluster_id', name='unique_pathway_cluster'),)
+    
+    def __repr__(self):
+        return f'<PathwayCluster {self.pathway.name} - {self.cluster.name}>'
 
 class StudentCareerInterest(db.Model):
     """Tracks student interest in career pathways and job roles"""

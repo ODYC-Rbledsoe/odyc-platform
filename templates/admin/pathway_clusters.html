@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Pathway-Cluster Mappings{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 mb-1">Pathway-Cluster Mappings</h1>
+                    <p class="text-muted mb-0">Configure which career clusters contain which pathways</p>
+                </div>
+                <a href="{{ url_for('admin.manage_clusters') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Clusters
+                </a>
+            </div>
+            
+            <!-- Add New Mapping -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Add New Mapping</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        <div class="row">
+                            <div class="col-md-4">
+                                {{ form.pathway_id.label(class="form-label") }}
+                                {{ form.pathway_id(class="form-select") }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.cluster_id.label(class="form-label") }}
+                                {{ form.cluster_id(class="form-select") }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="form-check">
+                                        {{ form.is_primary(class="form-check-input") }}
+                                        {{ form.is_primary.label(class="form-check-label") }}
+                                    </div>
+                                    {{ form.submit(class="btn btn-primary") }}
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Current Mappings -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Current Mappings</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if mappings %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Career Pathway</th>
+                                    <th>Career Cluster</th>
+                                    <th>Type</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for mapping in mappings %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div>
+                                                <strong>{{ mapping.pathway.name }}</strong>
+                                                <br><small class="text-muted">{{ mapping.pathway.description[:60] }}...</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if mapping.cluster.icon_class %}
+                                            <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                                                <i class="{{ mapping.cluster.icon_class }}" style="color: {{ mapping.cluster.color_code or '#6c757d' }};"></i>
+                                            </div>
+                                            {% endif %}
+                                            <div>
+                                                <strong>{{ mapping.cluster.name }}</strong>
+                                                {% if mapping.cluster.is_cross_cutting %}
+                                                <span class="badge bg-info ms-1">Cross-Cutting</span>
+                                                {% endif %}
+                                                {% if mapping.cluster.is_priority_local %}
+                                                <span class="badge bg-warning text-dark ms-1">Local Priority</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if mapping.is_primary %}
+                                        <span class="badge bg-primary">Primary</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Secondary</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('admin.delete_pathway_cluster', mapping_id=mapping.id) }}" 
+                                           class="btn btn-outline-danger btn-sm"
+                                           onclick="return confirm('Remove this mapping?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-link fa-3x text-muted mb-3"></i>
+                        <h5>No Mappings Yet</h5>
+                        <p class="text-muted">Create your first pathway-cluster mapping above.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Help Section -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card border-info">
+                        <div class="card-body">
+                            <h6 class="text-info">
+                                <i class="fas fa-info-circle me-1"></i>Mapping Guidelines
+                            </h6>
+                            <ul class="small mb-0">
+                                <li><strong>Primary Mapping:</strong> The main cluster where this pathway belongs (e.g., Process Operator → Manufacturing)</li>
+                                <li><strong>Secondary Mapping:</strong> Additional clusters where this pathway has relevance (e.g., Process Operator → Energy & Natural Resources)</li>
+                                <li><strong>Cross-Cutting Skills:</strong> Map pathways to cross-cutting clusters (Digital Technology, Management) when they involve those skills</li>
+                                <li><strong>Multiple Mappings:</strong> Pathways can belong to multiple clusters to reflect interdisciplinary nature</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
