@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}My Career Interests{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 mb-1">My Career Interests</h1>
+                    <p class="text-muted mb-0">Track your career exploration journey and pathway progress</p>
+                </div>
+                <a href="{{ url_for('career_clusters.explore_clusters') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-plus me-2"></i>Explore More Clusters
+                </a>
+            </div>
+            
+            {% if interests_by_cluster %}
+                {% for cluster_name, cluster_data in interests_by_cluster.items() %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i class="{{ cluster_data.cluster.icon_class }}" style="color: {{ cluster_data.cluster.color_code }};"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">{{ cluster_name }}</h5>
+                                <small class="text-muted">{{ cluster_data.interests|length }} pathway{% if cluster_data.interests|length != 1 %}s{% endif %}</small>
+                            </div>
+                            {% if cluster_data.cluster.is_priority_local %}
+                            <span class="badge bg-warning text-dark ms-auto">Local Priority</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            {% for interest in cluster_data.interests %}
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="card-title mb-0">{{ interest.pathway.name }}</h6>
+                                            <span class="badge 
+                                                {% if interest.interest_level == 'committed' %}bg-success
+                                                {% elif interest.interest_level == 'exploring' %}bg-warning
+                                                {% else %}bg-info{% endif %}">
+                                                {{ interest.interest_level.title() }}
+                                            </span>
+                                        </div>
+                                        
+                                        <p class="card-text small text-muted mb-3">{{ interest.pathway.description[:80] }}{% if interest.pathway.description|length > 80 %}...{% endif %}</p>
+                                        
+                                        <!-- Progress Bar -->
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <small class="text-muted">Progress</small>
+                                                <small class="fw-bold">{{ interest.progress_percentage }}%</small>
+                                            </div>
+                                            <div class="progress" style="height: 8px;">
+                                                <div class="progress-bar 
+                                                    {% if interest.progress_percentage >= 75 %}bg-success
+                                                    {% elif interest.progress_percentage >= 50 %}bg-warning
+                                                    {% else %}bg-info{% endif %}" 
+                                                     style="width: {{ interest.progress_percentage }}%"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Key Details -->
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-6">
+                                                <small class="text-muted">Target Role:</small><br>
+                                                <span class="small fw-bold">{{ interest.pathway.job_role.title }}</span>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted">Duration:</small><br>
+                                                <span class="small fw-bold">{{ interest.pathway.duration_months }} months</span>
+                                            </div>
+                                        </div>
+                                        
+                                        {% if interest.pathway.job_role.salary_range %}
+                                        <div class="mb-3">
+                                            <small class="text-muted">Expected Salary:</small><br>
+                                            <span class="badge bg-success">{{ interest.pathway.job_role.salary_range }}</span>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if interest.mentor_notes %}
+                                        <div class="mb-3">
+                                            <small class="text-muted">Mentor Notes:</small><br>
+                                            <p class="small bg-white p-2 rounded border">{{ interest.mentor_notes }}</p>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <div class="text-center">
+                                            <a href="{{ url_for('career_clusters.cluster_detail', cluster_id=cluster_data.cluster.id) }}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                View Cluster Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <!-- Progress Summary -->
+                <div class="row mt-5">
+                    <div class="col-md-8 mx-auto">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Your Career Journey</h5>
+                                <p class="card-text">You're exploring {{ interests_by_cluster|length }} career cluster{% if interests_by_cluster|length != 1 %}s{% endif %} with 
+                                    {% set total_interests = interests_by_cluster.values() | map(attribute='interests') | map('length') | sum %}
+                                    {{ total_interests }} pathway{% if total_interests != 1 %}s{% endif %} of interest.</p>
+                                <p class="small mb-0">Your mentor will help you narrow your focus and create a personalized action plan.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            {% else %}
+                <!-- No Interests Yet -->
+                <div class="row">
+                    <div class="col-md-8 mx-auto">
+                        <div class="card bg-light">
+                            <div class="card-body text-center py-5">
+                                <i class="fas fa-heart fa-3x text-muted mb-3"></i>
+                                <h3 class="h4 mb-3">Start Exploring Your Future</h3>
+                                <p class="text-muted mb-4">You haven't expressed interest in any career pathways yet. Explore the career clusters to discover opportunities that match your interests and goals.</p>
+                                <a href="{{ url_for('career_clusters.explore_clusters') }}" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>Explore Career Clusters
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Help Section -->
+            <div class="row mt-5">
+                <div class="col-md-8 mx-auto">
+                    <div class="card border-info">
+                        <div class="card-body">
+                            <h6 class="card-title text-info">
+                                <i class="fas fa-info-circle me-2"></i>How It Works
+                            </h6>
+                            <ul class="small mb-0 text-muted">
+                                <li><strong>Express Interest:</strong> Browse career clusters and express interest in pathways that excite you</li>
+                                <li><strong>Get Guidance:</strong> Your mentor will help you understand requirements and opportunities</li>
+                                <li><strong>Build Skills:</strong> Complete curriculum modules aligned with your chosen pathways</li>
+                                <li><strong>Connect with Employers:</strong> Access internships and job opportunities through our industry partners</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

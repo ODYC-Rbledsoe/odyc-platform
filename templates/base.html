@@ -29,6 +29,11 @@
                             <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('career_clusters.explore_clusters') }}">
+                            <i class="fas fa-map me-1"></i>Career Clusters
+                        </a>
+                    </li>
                     {% if current_user.is_admin() %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -58,6 +63,9 @@
                             <i class="fas fa-graduation-cap me-1"></i>My Journey
                         </a>
                         <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('career_clusters.my_interests') }}">
+                                <i class="fas fa-heart me-2"></i>My Career Interests
+                            </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('career.my_pathway') }}">
                                 <i class="fas fa-route me-2"></i>My Career Pathway
                             </a></li>
@@ -67,6 +75,7 @@
                             <li><a class="dropdown-item" href="{{ url_for('curriculum.student_curriculum') }}">
                                 <i class="fas fa-book me-2"></i>Learning Modules
                             </a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('career.explore_pathways') }}">
                                 <i class="fas fa-compass me-2"></i>Explore Careers
                             </a></li>

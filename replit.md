@@ -107,6 +107,15 @@ The application uses three main entities:
 - Future migrations should use Flask-Migrate
 
 ## Changelog
+- August 11, 2025: Integrated National Career Clusters Framework into ODYC
+  - Added CareerCluster model with 14 official clusters from modernized framework
+  - Linked existing local industries to appropriate career clusters
+  - Created comprehensive career clusters exploration interface
+  - Built student career interest tracking system
+  - Added priority cluster designation for Southwest Wyoming (6 priority clusters)
+  - Enhanced navigation with dedicated Career Clusters section
+  - Seeded all 14 clusters with authentic descriptions and visual branding
+  - Aligned ODYC pathways with national CTE standards for better transferability
 - July 10, 2025: Updated trusted partners section in landing page
   - Changed "Memorial Hospital" to "Sweetwater Memorial" for healthcare services
   - Updated manufacturing section to "Manufacturing & Mining" with partners "WeSoda, Tata, Church & Dwight, Simplot"

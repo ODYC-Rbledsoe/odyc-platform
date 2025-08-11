@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}{{ cluster.name }} - Career Cluster{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('career_clusters.explore_clusters') }}">Career Clusters</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ cluster.name }}</li>
+        </ol>
+    </nav>
+    
+    <!-- Cluster Header -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center">
+                            <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <i class="{{ cluster.icon_class }} fa-3x" style="color: {{ cluster.color_code }};"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-10">
+                            <div class="d-flex align-items-center mb-2">
+                                <h1 class="h2 mb-0">{{ cluster.name }}</h1>
+                                {% if cluster.is_priority_local %}
+                                <span class="badge bg-warning text-dark ms-3">Southwest Wyoming Priority</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-muted mb-0">{{ cluster.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if local_industries %}
+    <!-- Local Industries -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <h2 class="h3 mb-4">Local Industries in Southwest Wyoming</h2>
+            <div class="row g-4">
+                {% for industry in local_industries %}
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ industry.name }}</h5>
+                            <p class="card-text">{{ industry.description }}</p>
+                            <small class="text-muted">{{ industry.region }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if job_roles %}
+    <!-- Job Roles -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <h2 class="h3 mb-4">Available Job Roles</h2>
+            <div class="row g-4">
+                {% for role in job_roles %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ role.title }}</h5>
+                            <p class="card-text small flex-grow-1">{{ role.description[:100] }}{% if role.description|length > 100 %}...{% endif %}</p>
+                            
+                            <div class="mt-auto">
+                                {% if role.salary_range %}
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <small class="text-muted">Salary Range:</small>
+                                    <span class="badge bg-success">{{ role.salary_range }}</span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if role.growth_outlook %}
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <small class="text-muted">Growth Outlook:</small>
+                                    <span class="badge {% if role.growth_outlook == 'High' %}bg-success{% elif role.growth_outlook == 'Medium' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                        {{ role.growth_outlook }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if role.education_level %}
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">Education:</small>
+                                    <small class="fw-bold">{{ role.education_level }}</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if pathways %}
+    <!-- Career Pathways -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <h2 class="h3 mb-4">Career Pathways</h2>
+            <div class="row g-4">
+                {% for pathway in pathways %}
+                <div class="col-md-6">
+                    <div class="card h-100 {% if pathway.id in [interest.pathway_id for interest in user_interests] %}border-success{% endif %}">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="card-title">{{ pathway.name }}</h5>
+                                {% if pathway.id in [interest.pathway_id for interest in user_interests] %}
+                                <span class="badge bg-success">Interested</span>
+                                {% endif %}
+                            </div>
+                            
+                            <p class="card-text">{{ pathway.description }}</p>
+                            
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted">Duration:</small><br>
+                                    <span class="fw-bold">{{ pathway.duration_months }} months</span>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Target Role:</small><br>
+                                    <span class="fw-bold">{{ pathway.job_role.title }}</span>
+                                </div>
+                            </div>
+                            
+                            {% if pathway.employer_partners %}
+                            <div class="mb-3">
+                                <small class="text-muted">Employer Partners:</small><br>
+                                <small class="text-success">{{ pathway.employer_partners }}</small>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="mt-auto">
+                                {% if current_user.is_authenticated and current_user.is_student() %}
+                                    {% if pathway.id not in [interest.pathway_id for interest in user_interests] %}
+                                    <a href="{{ url_for('career_clusters.express_interest', cluster_id=cluster.id, pathway_id=pathway.id) }}" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-heart me-1"></i>Express Interest
+                                    </a>
+                                    {% else %}
+                                    <span class="text-success small">
+                                        <i class="fas fa-check-circle me-1"></i>You've expressed interest in this pathway
+                                    </span>
+                                    {% endif %}
+                                {% else %}
+                                <a href="{{ url_for('auth.register') }}" class="btn btn-outline-secondary btn-sm">
+                                    Join ODYC to Express Interest
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if not local_industries and not job_roles and not pathways %}
+    <!-- No Local Opportunities -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card bg-light">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h3 class="h4 mb-3">No Local Opportunities Yet</h3>
+                    <p class="text-muted mb-4">This career cluster doesn't have established pathways in Southwest Wyoming yet, but opportunities may be developing.</p>
+                    <p class="small text-muted">Contact our coordinators if you're interested in exploring opportunities in this field.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Navigation -->
+    <div class="row mt-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('career_clusters.explore_clusters') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to All Clusters
+                </a>
+                {% if current_user.is_authenticated and current_user.is_student() %}
+                <a href="{{ url_for('career_clusters.my_interests') }}" class="btn btn-primary">
+                    <i class="fas fa-heart me-2"></i>My Career Interests
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

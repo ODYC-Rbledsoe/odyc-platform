@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Explore Career Clusters{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- Header Section -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 mb-3">Explore Career Clusters</h1>
+                <p class="lead text-muted">Discover your path through the National Career Clusters Framework — 14 career areas that organize the world of work to help you explore, plan, and prepare for your future.</p>
+            </div>
+            
+            <!-- Framework Info -->
+            <div class="row mb-5">
+                <div class="col-md-8 mx-auto">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h5 class="card-title"><i class="fas fa-lightbulb text-warning me-2"></i>About Career Clusters</h5>
+                            <p class="card-text small">The National Career Clusters Framework provides a consistent structure to bridge education and work, helping you explore careers based on similar knowledge and skills. Each cluster represents multiple career pathways with opportunities for every education level.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if priority_clusters %}
+            <!-- Priority Clusters for Southwest Wyoming -->
+            <div class="mb-5">
+                <div class="d-flex align-items-center mb-4">
+                    <h2 class="h3 mb-0">Priority Clusters for Southwest Wyoming</h2>
+                    <span class="badge bg-warning text-dark ms-3">High Local Demand</span>
+                </div>
+                <p class="text-muted mb-4">These career clusters have strong local employer partnerships and high-demand opportunities in our region.</p>
+                
+                <div class="row g-4">
+                    {% for cluster in priority_clusters %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-warning shadow-sm">
+                            <div class="card-body d-flex flex-column">
+                                <div class="text-center mb-3">
+                                    <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                        <i class="{{ cluster.icon_class }} fa-2x" style="color: {{ cluster.color_code }};"></i>
+                                    </div>
+                                </div>
+                                <h5 class="card-title text-center">{{ cluster.name }}</h5>
+                                <p class="card-text small flex-grow-1">{{ cluster.description[:120] }}{% if cluster.description|length > 120 %}...{% endif %}</p>
+                                <div class="text-center mt-auto">
+                                    <a href="{{ url_for('career_clusters.cluster_detail', cluster_id=cluster.id) }}" class="btn btn-outline-warning">
+                                        Explore Opportunities <i class="fas fa-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if other_clusters %}
+            <!-- All Other Clusters -->
+            <div class="mb-5">
+                <h2 class="h3 mb-4">All Career Clusters</h2>
+                <p class="text-muted mb-4">Explore all 14 career clusters to discover opportunities across diverse industries and career paths.</p>
+                
+                <div class="row g-3">
+                    {% for cluster in other_clusters %}
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body d-flex flex-column">
+                                <div class="text-center mb-3">
+                                    <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <i class="{{ cluster.icon_class }} fa-lg" style="color: {{ cluster.color_code }};"></i>
+                                    </div>
+                                </div>
+                                <h6 class="card-title text-center small">{{ cluster.name }}</h6>
+                                <div class="text-center mt-auto">
+                                    <a href="{{ url_for('career_clusters.cluster_detail', cluster_id=cluster.id) }}" class="btn btn-sm btn-outline-secondary">
+                                        Learn More
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Call to Action -->
+            {% if current_user.is_authenticated and current_user.is_student() %}
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Track Your Career Journey</h5>
+                            <p class="card-text">Express interest in career pathways to get personalized guidance from your mentor and access to employer opportunities.</p>
+                            <a href="{{ url_for('career_clusters.my_interests') }}" class="btn btn-light">
+                                <i class="fas fa-heart me-2"></i>View My Interests
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Ready to Start Your Journey?</h5>
+                            <p class="card-text">Join ODYC to connect with industry mentors and explore personalized career pathways.</p>
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-light">
+                                <i class="fas fa-user-plus me-2"></i>Get Started
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

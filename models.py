@@ -181,13 +181,30 @@ class StudentProgress(db.Model):
     def __repr__(self):
         return f'<StudentProgress {self.student.name} - {self.module.title}>'
 
+class CareerCluster(db.Model):
+    """National Career Clusters Framework - 14 official clusters"""
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)  # e.g., "Advanced Manufacturing"
+    description = db.Column(db.Text)
+    color_code = db.Column(db.String(10))  # Hex color for UI consistency
+    icon_class = db.Column(db.String(50))  # Font Awesome icon class
+    is_priority_local = db.Column(db.Boolean, default=False)  # Priority for Southwest Wyoming
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<CareerCluster {self.name}>'
+
 class Industry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)  # Manufacturing, Healthcare, Energy, etc.
     description = db.Column(db.Text)
+    career_cluster_id = db.Column(db.Integer, db.ForeignKey('career_cluster.id'), nullable=False)  # Link to national framework
     region = db.Column(db.String(100), default='Southwest Wyoming')
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    career_cluster = db.relationship('CareerCluster', backref='local_industries')
     
     def __repr__(self):
         return f'<Industry {self.name}>'
