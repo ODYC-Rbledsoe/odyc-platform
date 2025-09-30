@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('path_mapper.index') }}">Find Your Path</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('path_mapper.my_plans') }}">My Plans</a></li>
+            <li class="breadcrumb-item active">My Plan</li>
+        </ol>
+    </nav>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h2><i class="fas fa-map"></i> My Career Pathway Plan</h2>
+                    <h4>{{ plan.job.title }} at {{ plan.job.employer }}</h4>
+                    <p class="mb-0">via {{ plan.program.name }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Progress: {{ plan.progress_pct }}% Complete</h5>
+                    <div class="progress" style="height: 30px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ plan.progress_pct }}%;" 
+                             aria-valuenow="{{ plan.progress_pct }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ plan.progress_pct }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Steps Checklist -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-list-check"></i> Your Action Steps</h5>
+                </div>
+                <div class="card-body">
+                    {% for step in plan.steps_list %}
+                    <div class="card mb-3 {% if step.completed %}border-success{% endif %}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h5>
+                                        {% if step.completed %}
+                                        <i class="fas fa-check-circle text-success"></i>
+                                        <del>{{ step.step }}</del>
+                                        {% else %}
+                                        <i class="far fa-circle"></i>
+                                        {{ step.step }}
+                                        {% endif %}
+                                    </h5>
+                                    <p class="mb-2">{{ step.description }}</p>
+                                    <small class="text-muted"><i class="fas fa-calendar"></i> Due: {{ step.due_date }}</small>
+                                </div>
+                                <div>
+                                    <form method="POST" action="{{ url_for('path_mapper.update_plan', plan_id=plan.id) }}" style="display: inline;">
+                                        <input type="hidden" name="step_index" value="{{ loop.index0 }}">
+                                        <input type="hidden" name="completed" value="{% if step.completed %}false{% else %}true{% endif %}">
+                                        <button type="submit" class="btn {% if step.completed %}btn-outline-secondary{% else %}btn-success{% endif %}">
+                                            {% if step.completed %}Undo{% else %}Complete{% endif %}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% if step.link %}
+                            <a href="{{ step.link }}" target="_blank" class="btn btn-sm btn-primary mt-2">
+                                <i class="fas fa-external-link-alt"></i> Go to Resource
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Summary Card -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle"></i> Summary</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Program:</strong> {{ plan.program.name }}</p>
+                    <p><strong>Skills Match:</strong> {{ coverage_pct }}%</p>
+                    <p><strong>Duration:</strong> ~{{ plan.program.duration_terms / 2 }} years</p>
+                    <p><strong>Status:</strong> 
+                        <span class="badge bg-{% if plan.status == 'active' %}success{% else %}secondary{% endif %}">
+                            {{ plan.status|title }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Skills Covered -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-check"></i> Skills You'll Gain</h5>
+                </div>
+                <div class="card-body">
+                    {% for alignment in alignments %}
+                    <div class="mb-2">
+                        <i class="fas fa-check-circle text-success"></i> {{ alignment.job_skill }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

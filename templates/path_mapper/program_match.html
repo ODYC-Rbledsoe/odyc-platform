@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('path_mapper.index') }}">Find Your Path</a></li>
+            <li class="breadcrumb-item active">Program Match</li>
+        </ol>
+    </nav>
+
+    <!-- Job Summary -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card bg-dark border-primary">
+                <div class="card-body">
+                    <h3><i class="fas fa-briefcase"></i> Target Job</h3>
+                    <h4>{{ job.title }}</h4>
+                    <h6 class="text-muted">{{ job.employer }} - {{ job.location }}</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Program Matches -->
+    {% for program_id, data in programs_data.items() %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-lg">
+                <div class="card-header bg-success text-white">
+                    <h4><i class="fas fa-graduation-cap"></i> Recommended Program</h4>
+                </div>
+                <div class="card-body">
+                    <h3>{{ data.program.name }}</h3>
+                    <h5 class="text-muted">{{ data.program.provider }}</h5>
+                    <p class="lead">{{ data.program.description }}</p>
+
+                    <!-- Coverage Bar -->
+                    <div class="mb-4">
+                        <h5>Skills Coverage: {{ data.covered_count }}/{{ job.skills_list|length }} skills</h5>
+                        <div class="progress" style="height: 30px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ data.coverage_pct }}%;" 
+                                 aria-valuenow="{{ data.coverage_pct }}" aria-valuemin="0" aria-valuemax="100">
+                                {{ data.coverage_pct }}% Match
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Matched Skills -->
+                    <h5><i class="fas fa-check-circle text-success"></i> What You'll Learn</h5>
+                    <div class="row mb-4">
+                        {% for alignment in data.alignments %}
+                        <div class="col-md-6 mb-2">
+                            <div class="card {% if alignment.coverage_level == 'covered' %}border-success{% elif alignment.coverage_level == 'partial' %}border-warning{% else %}border-danger{% endif %}">
+                                <div class="card-body p-3">
+                                    <strong>{{ alignment.job_skill }}</strong>
+                                    <br>
+                                    <small class="text-muted">→ {{ alignment.program_outcome }}</small>
+                                    {% if alignment.coverage_level == 'covered' %}
+                                    <span class="badge bg-success float-end">✓ Covered</span>
+                                    {% elif alignment.coverage_level == 'partial' %}
+                                    <span class="badge bg-warning float-end">Partial</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Program Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-clock"></i> Duration</h6>
+                            <p>{{ data.program.duration_terms }} semesters (~ {{ data.program.duration_terms / 2 }} years)</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-credit-card"></i> Credits</h6>
+                            <p>{{ data.program.total_credits }} credits</p>
+                        </div>
+                    </div>
+
+                    <!-- Next Steps -->
+                    <h5><i class="fas fa-list-check"></i> Next Steps</h5>
+                    <div class="list-group mb-4">
+                        <a href="{{ data.program.application_url }}" target="_blank" class="list-group-item list-group-item-action">
+                            <i class="fas fa-arrow-right text-primary"></i> <strong>Apply to WWCC</strong>
+                            <br><small>Complete online application for {{ data.program.name }}</small>
+                        </a>
+                        <a href="{{ data.program.advising_url }}" target="_blank" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user-tie text-primary"></i> <strong>Schedule Advising</strong>
+                            <br><small>Meet with advisor to plan your fastest certificate path</small>
+                        </a>
+                        <a href="{{ data.program.financial_aid_url }}" target="_blank" class="list-group-item list-group-item-action">
+                            <i class="fas fa-dollar-sign text-primary"></i> <strong>Financial Aid</strong>
+                            <br><small>Submit FAFSA and explore scholarship opportunities</small>
+                        </a>
+                        <a href="{{ data.program.schedule_url }}" target="_blank" class="list-group-item list-group-item-action">
+                            <i class="fas fa-calendar text-primary"></i> <strong>Class Schedule</strong>
+                            <br><small>View available courses and plan your semester</small>
+                        </a>
+                    </div>
+
+                    <!-- Call to Action -->
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('path_mapper.create_plan', job_id=job.id, program_id=data.program.id) }}" 
+                           class="btn btn-success btn-lg">
+                            <i class="fas fa-map"></i> Build My Personalized Plan
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% if not programs_data %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i> No program matches found for this job.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

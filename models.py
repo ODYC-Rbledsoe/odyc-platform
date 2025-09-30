@@ -732,3 +732,138 @@ class Session(db.Model):
     
     def __repr__(self):
         return f'<Session {self.topic} on {self.date.strftime("%Y-%m-%d")}>'
+
+# =============================================================================
+# PATH MAPPER MODELS - Job to Education Pathway Matching
+# =============================================================================
+
+class JobPosting(db.Model):
+    """Real job postings from employers"""
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    employer = db.Column(db.String(200), nullable=False)
+    location = db.Column(db.String(200))
+    description = db.Column(db.Text)
+    url = db.Column(db.String(500))
+    
+    # Requirements extracted from JD
+    required_skills = db.Column(db.Text)  # JSON list of skills
+    education_requirements = db.Column(db.Text)
+    experience_requirements = db.Column(db.Text)
+    physical_requirements = db.Column(db.Text)
+    special_requirements = db.Column(db.Text)  # e.g., "aptitude test required"
+    
+    # Metadata
+    is_active = db.Column(db.Boolean, default=True)
+    posted_date = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<JobPosting {self.title} at {self.employer}>'
+    
+    @property
+    def skills_list(self):
+        """Parse required_skills JSON into list"""
+        import json
+        if self.required_skills:
+            try:
+                return json.loads(self.required_skills)
+            except:
+                return []
+        return []
+
+class EducationProgram(db.Model):
+    """College/training programs that prepare students for jobs"""
+    id = db.Column(db.Integer, primary_key=True)
+    provider = db.Column(db.String(200), nullable=False)  # e.g., "WWCC"
+    name = db.Column(db.String(200), nullable=False)
+    program_type = db.Column(db.String(50))  # "AAS", "Certificate", "Diploma"
+    url = db.Column(db.String(500))
+    
+    # Program details
+    description = db.Column(db.Text)
+    learning_outcomes = db.Column(db.Text)  # JSON list of outcomes
+    duration_terms = db.Column(db.Integer)  # Number of semesters/terms
+    total_credits = db.Column(db.Integer)
+    
+    # Links
+    application_url = db.Column(db.String(500))
+    advising_url = db.Column(db.String(500))
+    schedule_url = db.Column(db.String(500))
+    financial_aid_url = db.Column(db.String(500))
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<EducationProgram {self.name} at {self.provider}>'
+    
+    @property
+    def outcomes_list(self):
+        """Parse learning_outcomes JSON into list"""
+        import json
+        if self.learning_outcomes:
+            try:
+                return json.loads(self.learning_outcomes)
+            except:
+                return []
+        return []
+
+class SkillAlignment(db.Model):
+    """Maps job skills to program learning outcomes"""
+    id = db.Column(db.Integer, primary_key=True)
+    job_id = db.Column(db.Integer, db.ForeignKey('job_posting.id'), nullable=False)
+    program_id = db.Column(db.Integer, db.ForeignKey('education_program.id'), nullable=False)
+    
+    # Alignment data
+    job_skill = db.Column(db.String(200), nullable=False)  # e.g., "Hydraulics"
+    program_outcome = db.Column(db.Text, nullable=False)  # Matching outcome from program
+    coverage_level = db.Column(db.String(20), default='covered')  # covered, partial, missing
+    notes = db.Column(db.Text)
+    
+    # Relationships
+    job = db.relationship('JobPosting', backref='skill_alignments')
+    program = db.relationship('EducationProgram', backref='skill_alignments')
+    
+    def __repr__(self):
+        return f'<SkillAlignment {self.job_skill} → {self.program_outcome[:50]}>'
+
+class StudentPlan(db.Model):
+    """Student's personalized enrollment plan for a job/program match"""
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    job_id = db.Column(db.Integer, db.ForeignKey('job_posting.id'), nullable=False)
+    program_id = db.Column(db.Integer, db.ForeignKey('education_program.id'), nullable=False)
+    
+    # Plan steps (JSON list of objects with {step, description, due_date, completed})
+    steps = db.Column(db.Text, nullable=False)  # JSON
+    notes = db.Column(db.Text)
+    
+    # Timeline
+    target_start_date = db.Column(db.DateTime)
+    target_completion_date = db.Column(db.DateTime)
+    
+    # Status tracking
+    status = db.Column(db.String(20), default='draft')  # draft, active, completed, cancelled
+    progress_pct = db.Column(db.Integer, default=0)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    student = db.relationship('User', backref='plans')
+    job = db.relationship('JobPosting', backref='student_plans')
+    program = db.relationship('EducationProgram', backref='student_plans')
+    
+    def __repr__(self):
+        return f'<StudentPlan {self.student.name} → {self.program.name}>'
+    
+    @property
+    def steps_list(self):
+        """Parse steps JSON into list"""
+        import json
+        if self.steps:
+            try:
+                return json.loads(self.steps)
+            except:
+                return []
+        return []

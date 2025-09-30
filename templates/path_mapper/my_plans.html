@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-map"></i> My Career Plans</h2>
+    <p class="text-muted">Track your career pathway plans</p>
+
+    {% if plans %}
+    <div class="row">
+        {% for plan in plans %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5>{{ plan.job.title }}</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Employer:</strong> {{ plan.job.employer }}</p>
+                    <p><strong>Program:</strong> {{ plan.program.name }}</p>
+                    <p><strong>Status:</strong> 
+                        <span class="badge bg-{% if plan.status == 'active' %}success{% else %}secondary{% endif %}">
+                            {{ plan.status|title }}
+                        </span>
+                    </p>
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ plan.progress_pct }}%;" 
+                             aria-valuenow="{{ plan.progress_pct }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ plan.progress_pct }}%
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('path_mapper.view_plan', plan_id=plan.id) }}" 
+                       class="btn btn-primary">
+                        <i class="fas fa-eye"></i> View Plan
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> You don't have any plans yet. 
+        <a href="{{ url_for('path_mapper.index') }}">Find your path</a> to get started!
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
