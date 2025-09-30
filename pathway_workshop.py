@@ -259,3 +259,201 @@ def create_badge(pathway_id):
         return redirect(url_for('workshop.pathway_detail', pathway_id=pathway_id))
     
     return render_template('workshop/badge_form.html', form=form, pathway=pathway)
+
+# Student Routes
+@workshop_bp.route('/projects')
+@login_required
+def student_projects():
+    """Browse published project cards (student view)"""
+    if not current_user.is_student():
+        flash('This page is for students only.', 'warning')
+        return redirect(url_for('workshop.dashboard'))
+    
+    # Get all published projects
+    projects = ProjectCard.query.filter_by(is_active=True, is_published=True).all()
+    
+    # Get student's submissions
+    my_artifacts = Artifact.query.filter_by(student_id=current_user.id).all()
+    submitted_project_ids = [a.project_card_id for a in my_artifacts]
+    
+    return render_template('workshop/student_projects.html',
+                          projects=projects,
+                          submitted_project_ids=submitted_project_ids)
+
+@workshop_bp.route('/project/<int:project_id>/view')
+@login_required
+def view_project(project_id):
+    """View detailed project card"""
+    project = ProjectCard.query.get_or_404(project_id)
+    
+    # Check if published for students, or if employer/admin viewing
+    if not project.is_published and not (current_user.is_admin() or current_user.is_employer() or current_user.role == 'coordinator'):
+        flash('This project is not yet published.', 'warning')
+        return redirect(url_for('workshop.student_projects'))
+    
+    # Get student's existing artifact if any
+    existing_artifact = None
+    if current_user.is_student():
+        existing_artifact = Artifact.query.filter_by(
+            student_id=current_user.id,
+            project_card_id=project_id
+        ).first()
+    
+    return render_template('workshop/project_view.html',
+                          project=project,
+                          existing_artifact=existing_artifact)
+
+@workshop_bp.route('/project/<int:project_id>/submit', methods=['GET', 'POST'])
+@login_required
+def submit_artifact(project_id):
+    """Submit artifact for a project"""
+    if not current_user.is_student():
+        flash('Only students can submit artifacts.', 'danger')
+        return redirect(url_for('workshop.dashboard'))
+    
+    project = ProjectCard.query.get_or_404(project_id)
+    
+    if not project.is_published:
+        flash('This project is not yet available for submission.', 'warning')
+        return redirect(url_for('workshop.student_projects'))
+    
+    # Check if already submitted
+    existing = Artifact.query.filter_by(
+        student_id=current_user.id,
+        project_card_id=project_id
+    ).first()
+    
+    if existing and existing.status == 'approved':
+        flash('You have already completed this project!', 'info')
+        return redirect(url_for('workshop.view_project', project_id=project_id))
+    
+    form = ArtifactSubmissionForm()
+    form.project_card_id.data = project_id
+    
+    if form.validate_on_submit():
+        if existing:
+            # Update existing submission
+            existing.submission_text = form.submission_text.data
+            existing.checklist_data = form.checklist_data.data
+            existing.status = 'submitted'
+            existing.submitted_at = datetime.utcnow()
+            artifact = existing
+        else:
+            # Create new submission
+            artifact = Artifact(
+                student_id=current_user.id,
+                project_card_id=project_id,
+                submission_text=form.submission_text.data,
+                checklist_data=form.checklist_data.data,
+                status='submitted',
+                submitted_at=datetime.utcnow()
+            )
+            db.session.add(artifact)
+        
+        db.session.commit()
+        flash('Your project artifact has been submitted successfully! A mentor will review it soon.', 'success')
+        return redirect(url_for('workshop.my_artifacts'))
+    
+    return render_template('workshop/submit_artifact.html',
+                          form=form,
+                          project=project,
+                          existing_artifact=existing)
+
+@workshop_bp.route('/my-artifacts')
+@login_required
+def my_artifacts():
+    """View student's own artifact submissions"""
+    if not current_user.is_student():
+        flash('This page is for students only.', 'warning')
+        return redirect(url_for('workshop.dashboard'))
+    
+    artifacts = Artifact.query.filter_by(student_id=current_user.id)\
+                              .order_by(Artifact.submitted_at.desc()).all()
+    
+    # Get earned badges
+    badges = StudentBadge.query.filter_by(student_id=current_user.id)\
+                               .order_by(StudentBadge.earned_at.desc()).all()
+    
+    # Calculate stats
+    approved_count = sum(1 for a in artifacts if a.status == 'approved')
+    total_hours = sum(a.project_card.duration_hours for a in artifacts if a.status == 'approved')
+    
+    return render_template('workshop/my_artifacts.html',
+                          artifacts=artifacts,
+                          badges=badges,
+                          approved_count=approved_count,
+                          total_hours=total_hours)
+
+# Mentor Routes
+@workshop_bp.route('/mentor/review')
+@login_required
+def mentor_review_dashboard():
+    """Mentor dashboard for reviewing artifacts"""
+    if not (current_user.is_mentor() or current_user.is_admin() or current_user.role == 'coordinator'):
+        flash('Access denied. This page is for mentors and coordinators.', 'danger')
+        return redirect(url_for('dashboard.index'))
+    
+    # Get artifacts needing review
+    pending = Artifact.query.filter_by(status='submitted')\
+                           .order_by(Artifact.submitted_at.desc()).all()
+    
+    # Get recently reviewed
+    reviewed = Artifact.query.filter(Artifact.status.in_(['approved', 'needs_revision']))\
+                            .order_by(Artifact.reviewed_at.desc()).limit(20).all()
+    
+    return render_template('workshop/mentor_review.html',
+                          pending=pending,
+                          reviewed=reviewed)
+
+@workshop_bp.route('/mentor/artifact/<int:artifact_id>/review', methods=['GET', 'POST'])
+@login_required
+def review_artifact(artifact_id):
+    """Review and sign off on student artifact"""
+    if not (current_user.is_mentor() or current_user.is_admin() or current_user.role == 'coordinator'):
+        flash('Access denied.', 'danger')
+        return redirect(url_for('dashboard.index'))
+    
+    artifact = Artifact.query.get_or_404(artifact_id)
+    form = MentorSignoffForm()
+    form.artifact_id.data = artifact_id
+    
+    if form.validate_on_submit():
+        artifact.performance_level = form.performance_level.data
+        artifact.mentor_feedback = form.mentor_feedback.data
+        artifact.status = form.status.data
+        artifact.reviewed_at = datetime.utcnow()
+        artifact.mentor_signoff_id = current_user.id
+        
+        # If approved, check if student earns a badge
+        if artifact.status == 'approved':
+            # Check for badges associated with this project
+            badges = SkillsBadge.query.filter_by(project_card_id=artifact.project_card_id).all()
+            for badge in badges:
+                # Check if student already has this badge
+                existing_badge = StudentBadge.query.filter_by(
+                    student_id=artifact.student_id,
+                    badge_id=badge.id
+                ).first()
+                
+                if not existing_badge:
+                    student_badge = StudentBadge(
+                        student_id=artifact.student_id,
+                        badge_id=badge.id,
+                        artifact_id=artifact.id,
+                        earned_at=datetime.utcnow(),
+                        verified_by_id=current_user.id
+                    )
+                    db.session.add(student_badge)
+        
+        db.session.commit()
+        
+        if artifact.status == 'approved':
+            flash(f'Artifact approved! {artifact.student.name} has earned the badge.', 'success')
+        else:
+            flash(f'Feedback sent to {artifact.student.name}.', 'info')
+        
+        return redirect(url_for('workshop.mentor_review_dashboard'))
+    
+    return render_template('workshop/review_artifact.html',
+                          form=form,
+                          artifact=artifact)

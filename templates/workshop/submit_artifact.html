@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('workshop.student_projects') }}">Projects</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('workshop.view_project', project_id=project.id) }}">{{ project.title }}</a></li>
+            <li class="breadcrumb-item active">Submit Artifact</li>
+        </ol>
+    </nav>
+
+    <h2>Submit Your Project</h2>
+    <p class="lead">{{ project.title }}</p>
+
+    {% if existing_artifact and existing_artifact.status == 'needs_revision' %}
+    <div class="alert alert-warning">
+        <strong><i class="fas fa-redo"></i> Resubmission Required</strong>
+        <p>Your mentor has requested revisions. Review the feedback and update your submission.</p>
+    </div>
+    {% endif %}
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-pen"></i> Project Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.submission_text.label(class="form-label") }}
+                            {{ form.submission_text(class="form-control") }}
+                            <small class="form-text text-muted">Describe what you did, what you learned, and any challenges you faced</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-check-square"></i> Checklist (Optional)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.checklist_data.label(class="form-label") }}
+                            {{ form.checklist_data(class="form-control") }}
+                            <small class="form-text text-muted">List completed steps or checklist items</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3 bg-light">
+                    <div class="card-body">
+                        <h6><i class="fas fa-info-circle"></i> File Upload Coming Soon</h6>
+                        <p class="mb-0">Photo and file upload functionality will be added in the next update. For now, describe your completed work in the text area above.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-3 sticky-top" style="top: 20px;">
+                    <div class="card-header">
+                        <h5><i class="fas fa-clipboard-check"></i> What to Submit</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Artifact Type:</strong> {{ project.artifact_type }}</p>
+                        <p>{{ project.artifact_description }}</p>
+                        
+                        <hr>
+                        
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-success btn-lg") }}
+                            <a href="{{ url_for('workshop.view_project', project_id=project.id) }}" 
+                               class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-tasks"></i> Project Steps</h5>
+                    </div>
+                    <div class="card-body">
+                        <small>
+                            <ol class="mb-0">
+                                {% for step in project.steps_list %}
+                                <li>{{ step[:50] }}...</li>
+                                {% endfor %}
+                            </ol>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

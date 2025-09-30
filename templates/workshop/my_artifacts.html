@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2><i class="fas fa-trophy"></i> My Progress & Badges</h2>
+            <p class="text-muted">Track your completed projects and earned credentials</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5><i class="fas fa-check-circle"></i> Completed Projects</h5>
+                    <h2>{{ approved_count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5><i class="fas fa-clock"></i> Total Hours</h5>
+                    <h2>{{ total_hours }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h5><i class="fas fa-certificate"></i> Badges Earned</h5>
+                    <h2>{{ badges|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Earned Badges -->
+    {% if badges %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-certificate"></i> My Badges</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for student_badge in badges %}
+                        <div class="col-md-3 mb-3">
+                            <div class="card text-center" style="border-left: 4px solid {{ student_badge.badge.color_code or '#4CAF50' }};">
+                                <div class="card-body">
+                                    <i class="{{ student_badge.badge.icon_class or 'fas fa-certificate' }} fa-3x mb-2" 
+                                       style="color: {{ student_badge.badge.color_code or '#4CAF50' }};"></i>
+                                    <h6>{{ student_badge.badge.name }}</h6>
+                                    <small class="text-muted">{{ student_badge.badge.description[:60] }}...</small>
+                                    <br>
+                                    <small>Earned {{ student_badge.earned_at.strftime('%b %d, %Y') }}</small>
+                                    {% if student_badge.badge.industry_recognized %}
+                                    <br><span class="badge bg-success mt-1">Industry Recognized</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Artifacts List -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-list"></i> My Submissions</h5>
+                    <a href="{{ url_for('workshop.student_projects') }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus"></i> Start New Project
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if artifacts %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Project</th>
+                                    <th>Submitted</th>
+                                    <th>Status</th>
+                                    <th>Performance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for artifact in artifacts %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ artifact.project_card.title }}</strong><br>
+                                        <small class="text-muted">{{ artifact.project_card.pathway.name }}</small>
+                                    </td>
+                                    <td>{{ artifact.submitted_at.strftime('%b %d, %Y') }}</td>
+                                    <td>
+                                        {% if artifact.status == 'submitted' %}
+                                        <span class="badge bg-info"><i class="fas fa-clock"></i> Pending Review</span>
+                                        {% elif artifact.status == 'approved' %}
+                                        <span class="badge bg-success"><i class="fas fa-check"></i> Approved</span>
+                                        {% elif artifact.status == 'needs_revision' %}
+                                        <span class="badge bg-warning"><i class="fas fa-redo"></i> Needs Revision</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if artifact.performance_level %}
+                                        <span class="badge bg-{{ 'success' if artifact.performance_level == 'proficient' else 'warning' }}">
+                                            {{ artifact.performance_level|title }}
+                                        </span>
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('workshop.view_project', project_id=artifact.project_card_id) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        {% if artifact.status == 'needs_revision' %}
+                                        <a href="{{ url_for('workshop.submit_artifact', project_id=artifact.project_card_id) }}" 
+                                           class="btn btn-sm btn-warning">
+                                            <i class="fas fa-edit"></i> Revise
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> You haven't submitted any projects yet. 
+                        <a href="{{ url_for('workshop.student_projects') }}">Browse available projects</a> to get started!
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

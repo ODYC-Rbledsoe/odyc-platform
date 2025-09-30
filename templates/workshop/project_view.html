@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('workshop.student_projects') }}">Projects</a></li>
+            <li class="breadcrumb-item active">{{ project.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8">
+            <h2>{{ project.title }}</h2>
+            <p class="lead">{{ project.objective }}</p>
+
+            {% if existing_artifact %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> 
+                <strong>Status:</strong> 
+                {% if existing_artifact.status == 'submitted' %}
+                Submitted - Waiting for mentor review
+                {% elif existing_artifact.status == 'approved' %}
+                <span class="text-success">Approved!</span> - Project completed
+                {% elif existing_artifact.status == 'needs_revision' %}
+                <span class="text-warning">Needs revision</span> - See feedback below
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-list-ol"></i> Prerequisites</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        {% for prereq in project.prerequisites_list %}
+                        <li>{{ prereq }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-clipboard-list"></i> Step-by-Step Instructions</h5>
+                </div>
+                <div class="card-body">
+                    <ol>
+                        {% for step in project.steps_list %}
+                        <li>{{ step }}</li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+
+            {% if project.safety_notes %}
+            <div class="card mb-3 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5><i class="fas fa-exclamation-triangle"></i> Safety Information</h5>
+                </div>
+                <div class="card-body">
+                    {{ project.safety_notes }}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-file-upload"></i> What to Submit</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Artifact Type:</strong> {{ project.artifact_type }}</p>
+                    <p>{{ project.artifact_description }}</p>
+                </div>
+            </div>
+
+            {% if existing_artifact and existing_artifact.mentor_feedback %}
+            <div class="card mb-3 {% if existing_artifact.status == 'approved' %}border-success{% else %}border-warning{% endif %}">
+                <div class="card-header">
+                    <h5><i class="fas fa-comment"></i> Mentor Feedback</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Performance Level:</strong> 
+                        <span class="badge bg-{{ 'success' if existing_artifact.performance_level == 'proficient' else 'warning' }}">
+                            {{ existing_artifact.performance_level|title }}
+                        </span>
+                    </p>
+                    <p>{{ existing_artifact.mentor_feedback }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-3 sticky-top" style="top: 20px;">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle"></i> Project Info</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Pathway:</strong><br>{{ project.pathway.name }}</p>
+                    <p><strong>Duration:</strong><br>{{ project.duration_hours }} hours</p>
+                    <p><strong>Location:</strong><br>
+                        {% if project.location_type == 'onsite' %}
+                        <span class="badge bg-info">On-site</span>
+                        {% elif project.location_type == 'school' %}
+                        <span class="badge bg-secondary">School</span>
+                        {% else %}
+                        <span class="badge bg-primary">Hybrid</span>
+                        {% endif %}
+                    </p>
+                    {% if project.ppe_required %}
+                    <p><strong>PPE Required:</strong><br>{{ project.ppe_required }}</p>
+                    {% endif %}
+
+                    <hr>
+
+                    {% if current_user.is_student() %}
+                        {% if not existing_artifact or existing_artifact.status == 'needs_revision' %}
+                        <div class="d-grid">
+                            <a href="{{ url_for('workshop.submit_artifact', project_id=project.id) }}" 
+                               class="btn btn-success btn-lg">
+                                <i class="fas fa-upload"></i> Submit Artifact
+                            </a>
+                        </div>
+                        {% elif existing_artifact.status == 'approved' %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> Completed!
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-clock"></i> Under Review
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if project.badges %}
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-certificate"></i> Earn These Badges</h5>
+                </div>
+                <div class="card-body">
+                    {% for badge in project.badges %}
+                    <div class="mb-2">
+                        <i class="{{ badge.icon_class or 'fas fa-certificate' }}" style="color: {{ badge.color_code or '#4CAF50' }};"></i>
+                        <strong>{{ badge.name }}</strong>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

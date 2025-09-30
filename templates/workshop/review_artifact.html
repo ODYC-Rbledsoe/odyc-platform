@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('workshop.mentor_review_dashboard') }}">Mentor Review</a></li>
+            <li class="breadcrumb-item active">Review Artifact</li>
+        </ol>
+    </nav>
+
+    <h2>Review Student Submission</h2>
+    <p class="lead">{{ artifact.student.name }} - {{ artifact.project_card.title }}</p>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Student Submission -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-file-alt"></i> Student's Project Summary</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Submitted:</strong> {{ artifact.submitted_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                    <hr>
+                    <div style="white-space: pre-wrap;">{{ artifact.submission_text }}</div>
+                </div>
+            </div>
+
+            {% if artifact.checklist_data %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-check-square"></i> Checklist Items</h5>
+                </div>
+                <div class="card-body">
+                    <pre>{{ artifact.checklist_data }}</pre>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Project Requirements -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-clipboard-list"></i> Project Requirements</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Objective:</strong> {{ artifact.project_card.objective }}</p>
+                    <p><strong>Required Artifact:</strong> {{ artifact.project_card.artifact_description }}</p>
+                    
+                    <hr>
+                    
+                    <h6>Project Steps:</h6>
+                    <ol>
+                        {% for step in artifact.project_card.steps_list %}
+                        <li>{{ step }}</li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Review Form -->
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-star"></i> Your Review</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.performance_level.label(class="form-label") }}
+                            {{ form.performance_level(class="form-select") }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.mentor_feedback.label(class="form-label") }}
+                            {{ form.mentor_feedback(class="form-control") }}
+                            <small class="form-text text-muted">Provide specific, constructive feedback</small>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.status.label(class="form-label") }}
+                            {{ form.status(class="form-select") }}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-success btn-lg") }}
+                            <a href="{{ url_for('workshop.mentor_review_dashboard') }}" 
+                               class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-3 sticky-top" style="top: 20px;">
+                <div class="card-header">
+                    <h5><i class="fas fa-user"></i> Student Info</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ artifact.student.name }}</p>
+                    <p><strong>Email:</strong> {{ artifact.student.email }}</p>
+                    {% if artifact.student.bio %}
+                    <p><strong>Bio:</strong> {{ artifact.student.bio }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle"></i> Project Info</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Duration:</strong> {{ artifact.project_card.duration_hours }} hours</p>
+                    <p><strong>Pathway:</strong> {{ artifact.project_card.pathway.name }}</p>
+                    <p><strong>Location:</strong> {{ artifact.project_card.location_type|title }}</p>
+                </div>
+            </div>
+
+            {% if artifact.project_card.rubrics %}
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-clipboard-check"></i> Assessment Rubric</h5>
+                </div>
+                <div class="card-body">
+                    {% for rubric in artifact.project_card.rubrics %}
+                    <h6>{{ rubric.competency }}</h6>
+                    <small>
+                        <p class="text-danger mb-1"><strong>Novice:</strong> {{ rubric.novice_criteria }}</p>
+                        <p class="text-warning mb-1"><strong>Developing:</strong> {{ rubric.developing_criteria }}</p>
+                        <p class="text-success mb-1"><strong>Proficient:</strong> {{ rubric.proficient_criteria }}</p>
+                    </small>
+                    <hr>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

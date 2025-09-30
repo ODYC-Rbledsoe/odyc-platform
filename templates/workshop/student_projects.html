@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2><i class="fas fa-tasks"></i> Available Projects</h2>
+            <p class="text-muted">Complete hands-on projects to earn skills badges and build your portfolio</p>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <a href="{{ url_for('workshop.my_artifacts') }}" class="btn btn-primary">
+                <i class="fas fa-trophy"></i> My Progress & Badges
+            </a>
+        </div>
+    </div>
+
+    {% if projects %}
+    <div class="row">
+        {% for project in projects %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 {% if project.id in submitted_project_ids %}border-success{% endif %}">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ project.title }}</h5>
+                    {% if project.id in submitted_project_ids %}
+                    <span class="badge bg-success"><i class="fas fa-check"></i> Submitted</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <p><strong>Pathway:</strong> {{ project.pathway.name }}</p>
+                    <p class="text-muted">{{ project.objective[:150] }}...</p>
+                    
+                    <div class="mb-2">
+                        <i class="fas fa-clock"></i> <strong>{{ project.duration_hours }} hours</strong>
+                    </div>
+                    <div class="mb-2">
+                        {% if project.location_type == 'onsite' %}
+                        <span class="badge bg-info"><i class="fas fa-building"></i> On-site</span>
+                        {% elif project.location_type == 'school' %}
+                        <span class="badge bg-secondary"><i class="fas fa-school"></i> School</span>
+                        {% else %}
+                        <span class="badge bg-primary"><i class="fas fa-exchange-alt"></i> Hybrid</span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if project.ppe_required %}
+                    <div class="mb-2">
+                        <small class="text-warning"><i class="fas fa-hard-hat"></i> PPE: {{ project.ppe_required }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('workshop.view_project', project_id=project.id) }}" 
+                       class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
+                    {% if project.id not in submitted_project_ids %}
+                    <a href="{{ url_for('workshop.submit_artifact', project_id=project.id) }}" 
+                       class="btn btn-success btn-sm">
+                        <i class="fas fa-upload"></i> Start Project
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> No projects are available yet. Check back soon!
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
