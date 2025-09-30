@@ -278,3 +278,133 @@ class PathwayClusterMappingForm(FlaskForm):
     is_primary = BooleanField('Primary Association', default=True,
                             description="Primary vs secondary cluster association")
     submit = SubmitField('Add Mapping')
+
+# Pathway Workshop Forms
+class ProjectCardForm(FlaskForm):
+    """Form for employers and educators to co-author project cards"""
+    pathway_id = SelectField('Career Pathway', coerce=int, validators=[DataRequired()],
+                            render_kw={"class": "form-select"})
+    title = StringField('Project Title', validators=[DataRequired(), Length(min=5, max=200)],
+                       render_kw={"placeholder": "e.g., Lockout/Tagout Walkdown"})
+    objective = TextAreaField('Learning Objective', validators=[DataRequired(), Length(min=20, max=1000)],
+                             render_kw={"rows": 3, "placeholder": "What will students accomplish through this project?"})
+    duration_hours = SelectField('Duration (hours)', coerce=int, choices=[
+        (2, '2 hours'), (4, '4 hours'), (6, '6 hours'), (8, '8 hours'),
+        (10, '10 hours'), (12, '12 hours'), (16, '16 hours'), (20, '20 hours')
+    ], default=4, validators=[DataRequired()])
+    
+    # Prerequisites and steps
+    prerequisites = TextAreaField('Prerequisites', validators=[Optional(), Length(max=1000)],
+                                 render_kw={"rows": 2, "placeholder": "Site orientation; OSHA-10; PPE training (one per line)"})
+    steps = TextAreaField('Step-by-Step Instructions', validators=[DataRequired(), Length(min=20, max=2000)],
+                         render_kw={"rows": 5, "placeholder": "Step 1: Identify energy sources\nStep 2: Verify procedures\nStep 3: Apply locks..."})
+    
+    # Safety and materials
+    safety_notes = TextAreaField('Safety & JHA Notes', validators=[Optional(), Length(max=1000)],
+                                render_kw={"rows": 3, "placeholder": "OSHA requirements, hazards, emergency procedures..."})
+    tools_materials = TextAreaField('Tools & Materials', validators=[Optional(), Length(max=1000)],
+                                   render_kw={"rows": 2, "placeholder": "Hard hat, safety glasses, locks, tags, multimeter..."})
+    ppe_required = StringField('PPE Required', validators=[Optional(), Length(max=200)],
+                              render_kw={"placeholder": "Hard hat, safety glasses, steel-toe boots, gloves"})
+    
+    # Artifact specification
+    artifact_type = SelectField('Artifact Type', choices=[
+        ('checklist+photos', 'Checklist + Photos'),
+        ('photos', 'Photos Only'),
+        ('video', 'Video Demonstration'),
+        ('report', 'Written Report'),
+        ('checklist', 'Checklist Only'),
+        ('presentation', 'Presentation')
+    ], default='checklist+photos', validators=[DataRequired()])
+    artifact_description = TextAreaField('What to Submit', validators=[DataRequired(), Length(min=20, max=500)],
+                                        render_kw={"rows": 2, "placeholder": "Submit completed checklist with 3-4 photos showing each step..."})
+    
+    # Logistics
+    location_type = SelectField('Location', choices=[
+        ('onsite', 'On-site at employer'),
+        ('school', 'School-based simulation'),
+        ('hybrid', 'Hybrid (both locations)')
+    ], default='onsite', validators=[DataRequired()])
+    capacity_per_month = IntegerField('Students per Month', validators=[DataRequired(), NumberRange(min=1, max=50)],
+                                     default=4, render_kw={"placeholder": "4"})
+    mentor_required = BooleanField('Mentor Required', default=True)
+    supervisor_signoff = BooleanField('Supervisor Sign-off Required', default=True)
+    
+    submit = SubmitField('Save Project Card')
+
+class RubricForm(FlaskForm):
+    """Form for creating assessment rubrics"""
+    pathway_id = SelectField('Career Pathway', coerce=int, validators=[DataRequired()])
+    project_card_id = SelectField('Project Card (Optional)', coerce=int, validators=[Optional()])
+    
+    competency = StringField('Competency', validators=[DataRequired(), Length(min=5, max=200)],
+                            render_kw={"placeholder": "e.g., Lockout/Tagout Procedures"})
+    
+    # Performance levels
+    novice_criteria = TextAreaField('Novice Level', validators=[DataRequired(), Length(min=20, max=500)],
+                                   render_kw={"rows": 2, "placeholder": "Can identify energy sources with guidance..."})
+    developing_criteria = TextAreaField('Developing Level', validators=[DataRequired(), Length(min=20, max=500)],
+                                       render_kw={"rows": 2, "placeholder": "Performs LOTO with minor prompts; completes checklist..."})
+    proficient_criteria = TextAreaField('Proficient Level', validators=[DataRequired(), Length(min=20, max=500)],
+                                       render_kw={"rows": 2, "placeholder": "Executes LOTO independently; verifies try-out; completes documentation..."})
+    
+    weight = IntegerField('Weight', validators=[Optional(), NumberRange(min=1, max=10)], default=1,
+                         render_kw={"placeholder": "1"})
+    is_required = BooleanField('Required for Pathway Completion', default=True)
+    
+    submit = SubmitField('Save Rubric')
+
+class ArtifactSubmissionForm(FlaskForm):
+    """Form for students to submit project artifacts"""
+    project_card_id = HiddenField(validators=[DataRequired()])
+    
+    submission_text = TextAreaField('Project Summary', validators=[DataRequired(), Length(min=50, max=2000)],
+                                   render_kw={"rows": 5, "placeholder": "Describe what you did, what you learned, and any challenges you faced..."})
+    
+    # File upload would be handled separately with Flask-Upload or similar
+    # For now, we'll use a text field for file paths
+    checklist_data = TextAreaField('Checklist Items (Optional)', validators=[Optional(), Length(max=2000)],
+                                  render_kw={"rows": 4, "placeholder": "Checked item 1\nChecked item 2\n..."})
+    
+    submit = SubmitField('Submit Artifact')
+
+class MentorSignoffForm(FlaskForm):
+    """Form for mentors to review and approve student artifacts"""
+    artifact_id = HiddenField(validators=[DataRequired()])
+    
+    performance_level = SelectField('Performance Level', choices=[
+        ('novice', 'Novice - Needs significant guidance'),
+        ('developing', 'Developing - Shows progress, needs minor support'),
+        ('proficient', 'Proficient - Demonstrates mastery')
+    ], validators=[DataRequired()])
+    
+    mentor_feedback = TextAreaField('Feedback', validators=[DataRequired(), Length(min=20, max=1000)],
+                                   render_kw={"rows": 4, "placeholder": "Provide constructive feedback on the student's work..."})
+    
+    status = SelectField('Decision', choices=[
+        ('approved', 'Approve - Award Badge'),
+        ('needs_revision', 'Needs Revision - Return to Student')
+    ], validators=[DataRequired()])
+    
+    submit = SubmitField('Submit Review')
+
+class SkillsBadgeForm(FlaskForm):
+    """Form for creating digital badges"""
+    name = StringField('Badge Name', validators=[DataRequired(), Length(min=3, max=100)],
+                      render_kw={"placeholder": "e.g., LOTO Certified"})
+    description = TextAreaField('Description', validators=[DataRequired(), Length(min=20, max=500)],
+                               render_kw={"rows": 3, "placeholder": "What this badge represents..."})
+    icon_class = StringField('Icon Class', validators=[Optional(), Length(max=50)],
+                           render_kw={"placeholder": "fas fa-certificate"})
+    color_code = StringField('Badge Color', validators=[Optional(), Length(max=7)],
+                           render_kw={"type": "color", "value": "#4CAF50"})
+    
+    pathway_id = SelectField('Career Pathway', coerce=int, validators=[Optional()])
+    project_card_id = SelectField('Project Card', coerce=int, validators=[Optional()])
+    required_artifacts = IntegerField('Artifacts Required', validators=[DataRequired(), NumberRange(min=1, max=10)],
+                                     default=1, render_kw={"placeholder": "1"})
+    
+    industry_recognized = BooleanField('Industry-Recognized Credential', default=False)
+    stackable = BooleanField('Stackable (Can combine with other badges)', default=True)
+    
+    submit = SubmitField('Create Badge')

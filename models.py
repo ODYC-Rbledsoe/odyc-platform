@@ -444,6 +444,233 @@ class Sponsorship(db.Model):
     def is_active(self):
         return self.status == 'active' and (not self.end_date or self.end_date > datetime.utcnow())
 
+class ProjectCard(db.Model):
+    """Hands-on projects co-authored by employers and educators in pathway workshops"""
+    id = db.Column(db.Integer, primary_key=True)
+    pathway_id = db.Column(db.Integer, db.ForeignKey('career_pathway.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)  # "Lockout/Tagout Walkdown"
+    objective = db.Column(db.Text, nullable=False)  # What students will accomplish
+    duration_hours = db.Column(db.Integer, default=4)  # Expected hours to complete
+    
+    # Prerequisites and steps
+    prerequisites = db.Column(db.Text)  # JSON array of prerequisite skills/certs
+    steps = db.Column(db.Text)  # JSON array of step-by-step instructions
+    
+    # Safety and materials
+    safety_notes = db.Column(db.Text)  # OSHA, PPE, JHA requirements
+    tools_materials = db.Column(db.Text)  # JSON array of required tools/materials
+    ppe_required = db.Column(db.String(200))  # PPE requirements
+    
+    # Artifact specification
+    artifact_type = db.Column(db.String(50), default='checklist+photos')  # checklist, photos, video, report, etc.
+    artifact_description = db.Column(db.Text)  # What student should submit
+    
+    # Logistics
+    location_type = db.Column(db.String(20), default='onsite')  # onsite, school, hybrid
+    capacity_per_month = db.Column(db.Integer, default=4)  # How many students per month
+    mentor_required = db.Column(db.Boolean, default=True)
+    supervisor_signoff = db.Column(db.Boolean, default=True)
+    
+    # Windows/scheduling
+    available_windows = db.Column(db.Text)  # JSON array of date ranges/windows
+    blackout_dates = db.Column(db.Text)  # JSON array of unavailable dates
+    
+    # Status and metadata
+    is_active = db.Column(db.Boolean, default=True)
+    is_published = db.Column(db.Boolean, default=False)  # Ready for students
+    created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Employer/admin who created
+    approved_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Educator who approved
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    pathway = db.relationship('CareerPathway', backref='project_cards')
+    created_by = db.relationship('User', foreign_keys=[created_by_id], backref='created_projects')
+    approved_by = db.relationship('User', foreign_keys=[approved_by_id], backref='approved_projects')
+    
+    def __repr__(self):
+        return f'<ProjectCard {self.title}>'
+    
+    @property
+    def prerequisites_list(self):
+        """Parse JSON prerequisites into list"""
+        import json
+        try:
+            return json.loads(self.prerequisites) if self.prerequisites else []
+        except:
+            return []
+    
+    @property
+    def steps_list(self):
+        """Parse JSON steps into list"""
+        import json
+        try:
+            return json.loads(self.steps) if self.steps else []
+        except:
+            return []
+
+class Rubric(db.Model):
+    """Assessment rubrics for evaluating student project work"""
+    id = db.Column(db.Integer, primary_key=True)
+    pathway_id = db.Column(db.Integer, db.ForeignKey('career_pathway.id'), nullable=False)
+    project_card_id = db.Column(db.Integer, db.ForeignKey('project_card.id'), nullable=True)  # Optional: specific to a project
+    
+    competency = db.Column(db.String(200), nullable=False)  # "Lockout/Tagout Procedures"
+    
+    # Performance levels
+    novice_criteria = db.Column(db.Text)  # What novice performance looks like
+    developing_criteria = db.Column(db.Text)  # What developing performance looks like
+    proficient_criteria = db.Column(db.Text)  # What proficient performance looks like
+    
+    # Weighting and importance
+    weight = db.Column(db.Integer, default=1)  # For weighted scoring
+    is_required = db.Column(db.Boolean, default=True)  # Required for pathway completion
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    pathway = db.relationship('CareerPathway', backref='rubrics')
+    project_card = db.relationship('ProjectCard', backref='rubrics')
+    
+    def __repr__(self):
+        return f'<Rubric {self.competency}>'
+
+class Artifact(db.Model):
+    """Student submissions for project cards - photos, files, checklists"""
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    project_card_id = db.Column(db.Integer, db.ForeignKey('project_card.id'), nullable=False)
+    
+    # Submission content
+    submission_text = db.Column(db.Text)  # Student's write-up or notes
+    file_paths = db.Column(db.Text)  # JSON array of file paths (photos, PDFs, etc.)
+    checklist_data = db.Column(db.Text)  # JSON for checklist items completed
+    
+    # Status and review
+    status = db.Column(db.String(20), default='submitted')  # submitted, under_review, approved, needs_revision
+    performance_level = db.Column(db.String(20))  # novice, developing, proficient
+    mentor_feedback = db.Column(db.Text)  # Feedback from mentor/teacher
+    
+    # Timing
+    submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    reviewed_at = db.Column(db.DateTime)
+    
+    # Signoffs
+    mentor_signoff_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    supervisor_signoff_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    student = db.relationship('User', foreign_keys=[student_id], backref='submitted_artifacts')
+    project_card = db.relationship('ProjectCard', backref='student_artifacts')
+    mentor_signoff = db.relationship('User', foreign_keys=[mentor_signoff_id], backref='mentor_signoffs')
+    supervisor_signoff = db.relationship('User', foreign_keys=[supervisor_signoff_id], backref='supervisor_signoffs')
+    
+    def __repr__(self):
+        return f'<Artifact {self.student.name} - {self.project_card.title}>'
+    
+    @property
+    def is_approved(self):
+        return self.status == 'approved'
+    
+    @property
+    def file_list(self):
+        """Parse JSON file paths into list"""
+        import json
+        try:
+            return json.loads(self.file_paths) if self.file_paths else []
+        except:
+            return []
+
+class SkillsBadge(db.Model):
+    """Digital badges earned through project completion"""
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)  # "LOTO Certified", "Electrical Safety"
+    description = db.Column(db.Text)
+    icon_class = db.Column(db.String(50))  # Font Awesome icon
+    color_code = db.Column(db.String(10))  # Hex color for badge
+    
+    # Badge criteria
+    pathway_id = db.Column(db.Integer, db.ForeignKey('career_pathway.id'), nullable=True)
+    project_card_id = db.Column(db.Integer, db.ForeignKey('project_card.id'), nullable=True)
+    required_artifacts = db.Column(db.Integer, default=1)  # Number of artifacts needed
+    
+    # Badge value
+    industry_recognized = db.Column(db.Boolean, default=False)  # Industry-recognized credential
+    stackable = db.Column(db.Boolean, default=True)  # Can combine with other badges
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    pathway = db.relationship('CareerPathway', backref='badges')
+    project_card = db.relationship('ProjectCard', backref='badges')
+    
+    def __repr__(self):
+        return f'<SkillsBadge {self.name}>'
+
+class StudentBadge(db.Model):
+    """Junction table for students earning badges"""
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    badge_id = db.Column(db.Integer, db.ForeignKey('skills_badge.id'), nullable=False)
+    artifact_id = db.Column(db.Integer, db.ForeignKey('artifact.id'), nullable=True)  # Which artifact earned it
+    
+    earned_at = db.Column(db.DateTime, default=datetime.utcnow)
+    verified_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Mentor who verified
+    
+    # Relationships
+    student = db.relationship('User', foreign_keys=[student_id], backref='earned_badges')
+    badge = db.relationship('SkillsBadge', backref='student_awards')
+    artifact = db.relationship('Artifact', backref='badges_earned')
+    verified_by = db.relationship('User', foreign_keys=[verified_by_id], backref='verified_badges')
+    
+    def __repr__(self):
+        return f'<StudentBadge {self.student.name} - {self.badge.name}>'
+
+class SkillsTranscript(db.Model):
+    """Generated skills transcript for students - shows badges, hours, endorsements"""
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    pathway_id = db.Column(db.Integer, db.ForeignKey('career_pathway.id'), nullable=True)
+    
+    # Transcript data
+    total_hours = db.Column(db.Integer, default=0)  # Total project hours completed
+    badges_earned = db.Column(db.Text)  # JSON array of badge IDs
+    artifacts_count = db.Column(db.Integer, default=0)
+    endorsements = db.Column(db.Text)  # JSON array of mentor endorsements
+    
+    # Generated files
+    pdf_path = db.Column(db.String(500))
+    verification_code = db.Column(db.String(100))  # QR-verifiable code
+    
+    # Sharing
+    is_public = db.Column(db.Boolean, default=False)
+    shared_with = db.Column(db.Text)  # JSON array of employer emails
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    student = db.relationship('User', backref='skills_transcripts')
+    pathway = db.relationship('CareerPathway', backref='transcripts')
+    
+    def __repr__(self):
+        return f'<SkillsTranscript {self.student.name}>'
+    
+    @property
+    def badges_list(self):
+        """Parse JSON badges into list"""
+        import json
+        try:
+            badge_ids = json.loads(self.badges_earned) if self.badges_earned else []
+            return SkillsBadge.query.filter(SkillsBadge.id.in_(badge_ids)).all()
+        except:
+            return []
+
 class StudentPortfolio(db.Model):
     """Generated student portfolios for sharing with employers"""
     id = db.Column(db.Integer, primary_key=True)
