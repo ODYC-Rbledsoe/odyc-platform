@@ -1,0 +1,93 @@
+Goal
+
+Co-author a hiring-ready pathway for one role (e.g., Maintenance Tech or E&I Tech) and leave with mentor projects scheduled, artifacts defined, and a rubric schools can assess.
+
+Who should be in the room
+
+Employers (2–4 SMEs): ops lead/foreman + a standout tech; HR/SHRM rep; safety rep.
+
+Education partners (yes): CTE teacher for that cluster, WBL coordinator, counselor (and, if possible, special services/504 rep).
+
+Facilitator: you (ODYC) + note-taker. Optional: workforce center rep or apprenticeship partner.
+
+Why include educators: they align competencies to WY CTE standards/credit, handle consent/transport/scheduling, and ensure projects are realistic in a school calendar. If calendars are tight, run an employer-first session (2 hours) and a teacher alignment session (1.5 hours) within 72 hours.
+
+Format (1 day or 2×3-hour blocks)
+
+Block 1 – Define the role (90 min)
+
+Day-in-the-life, purpose, tools, environments, shift patterns.
+
+KSA matrix: knowledge, skills, abilities + soft skills.
+
+Min quals & safety: age limits, OSHA-10/MSHA, PPE, background/driver reqs.
+
+Block 2 – Map the pathway (60 min)
+
+Entry → 6-, 12-, 24-month milestones; wage bands.
+
+Certifications/badges to target; map to WY CTE standards (educator leads).
+
+Block 3 – Design mentor projects (90 min)
+
+Create 4–6 “Project Cards” (each 4–12 hours).
+
+For each card: objective, prerequisites, steps, safety, materials/tools, artifact to submit (photos, checklist, brief write-up), supervisor sign-off, location (on-site or school-based sim).
+
+Block 4 – Rubric & logistics (45 min)
+
+Assessment rubric (novice → proficient) tied to artifacts.
+
+Capacity per month, blackout dates, supervision ratios, transportation/consent, site orientation plan.
+
+Block 5 – Commitments & calendar (30 min)
+
+Pick project start windows and mentors.
+
+Assign owners for follow-ups; set first Hiring Day/Showcase date.
+
+Concrete outputs you’ll publish (within 5 business days)
+
+Role Map (v1): purpose, KSA matrix, milestones, certs/badges, wage bands.
+
+Project Pack: 4–6 Project Cards with safety notes and artifacts.
+
+Assessment Rubric: skill criteria tied to artifacts; teacher-friendly.
+
+Transcript Map: which artifacts trigger which badges on the ODYC Skills Transcript.
+
+WBL Logistics Sheet: consent templates, orientation checklist, insurance/COI notes, capacity & calendar.
+
+Comms Kit: one-pager for students/parents + mentor orientation slide.
+
+Templates (use these fields)
+
+Project Card
+
+Title; Duration (hrs); On-site vs school-based; Objective; Prereqs; Steps; Tools/PPE; Safety & JHA notes; Artifact required; Sign-off; Mentor; Capacity/month; Windows.
+
+Rubric row
+
+Competency → Evidence (artifact) → Criteria (Novice/Developing/Proficient) → Sign-off.
+
+RACI (who decides what)
+
+Employers: tasks, safety, tools, project acceptance criteria, capacity.
+
+Educators: standards alignment, credit, grading, accommodations, calendar.
+
+ODYC: facilitation, documentation, platform config, consent/workflow, dashboards.
+
+HR/SHRM: screening, background/drug policies, EEO guardrails.
+
+Compliance & risk basics (bake into the pack)
+
+Parent/guardian consent; photo/media release; transport plan; minor-on-site rules; PPE provided; mentor code of conduct; incident reporting; ADA/IEP accommodations.
+
+Variants
+
+Employer-only sprint: if schools can’t attend; ODYC drafts the pack, then runs a 60–90 min educator alignment to map to standards/credit.
+
+Multi-employer track: 2 roles in parallel using breakout tables, reconvening to standardize rubrics/badges.
+
+If you want, I can turn this into a printable facilitator guide + fillable Project Card/Rubric templates right now so you can walk into the room with paper and a checklist.

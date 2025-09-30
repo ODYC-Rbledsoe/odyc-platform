@@ -1,0 +1,99 @@
+Love it—here’s a simple, fast path to make the Pathway Workshop fully digital, from intake → co-authoring → scheduling → artifacts → transcript.
+
+What “digital” means (end-to-end)
+
+Employers enter role info online → you co-author Pathway + Project Cards live → projects get scheduled → students submit artifacts (photos, checklists, short videos) on their phone → mentors/teachers sign off → a Skills Transcript (PDF link) updates automatically.
+
+3-stage build (move fast, de-risk)
+
+Stage 1 — No-code pilot (1–2 weeks)
+
+Intake: Google Form (Employer role intake), Teacher/WBL intake, Student consent.
+
+Database: Airtable (tables: Employers, Roles/Pathways, Project Cards, Rubrics, Students, Artifacts, Consents, Schedules).
+
+Scheduling: Google Calendar slots + Zapier to create events from approved Project Cards.
+
+Artifacts: Google Drive/OneDrive folders auto-created per student+project; upload via link; Airtable records the artifact URL + mentor sign-off.
+
+Transcript: Airtable Interface → one-click PDF export (or Document Studio) summarizing badges & artifacts.
+
+Stage 2 — Lightweight web app (4–6 weeks)
+
+Stack: Next.js/React + Supabase (Auth/Postgres/Storage) or Firebase (Auth/Firestore/Storage).
+
+SSO: Google/MS for students and staff.
+
+Features:
+
+Employer portal: create Pathway → Project Card with guardrails (durations, safety, capacity).
+
+Educator portal: align to WY CTE standards, set credit, roster students.
+
+Student portal (mobile): see projects, apply, upload artifacts, view badges/transcript.
+
+Mentor app (mobile web): approve, comment, sign off.
+
+Admin: consent management, risk flags, reporting.
+
+Stage 3 — V1 polish (8–12 weeks)
+
+Rubrics & badging engine, calendar sync (Google/Microsoft), CSV/SIS roster import, PDF transcript with QR-verifiable link, dashboards (placements, time-to-interview, hours logged).
+
+Roles & flows (digital UX)
+
+Employer SME → “Create Pathway” → add 4–6 Project Cards (objective, steps, safety, artifact, capacity, windows) → submit.
+
+Educator/WBL → map to standards/credit, set eligibility, publish to students.
+
+Student → browse → apply → receive calendar invite/requirements → complete → upload artifact → auto-badge.
+
+Mentor → tap to approve/sign (date, notes, hours) → triggers badge + transcript update.
+
+Minimal data model (keep it tight)
+
+User {role: student|mentor|teacher|admin, orgId}
+
+Employer {name, contacts, locations}
+
+Pathway {title, ksas[], milestones[], badges[], wageBands[]}
+
+ProjectCard {pathwayId, objective, steps[], safety, artifactSpec, durationHrs, capacity, windows[], onsite|school}
+
+Rubric {competency, novice|developing|proficient criteria}
+
+Consent {studentId, guardian name, timestamp, scope}
+
+Artifact {studentId, projectId, files[], mentorSignoff, score, badgeIds[]}
+
+Transcript {studentId, badges[], artifacts[], hours, endorsements[]}
+
+Compliance by design
+
+Consent first (guardian e-signature, media release, transport plan).
+
+Least PII (school ID, no SSNs).
+
+Data retention (e.g., archive artifacts after 24 months).
+
+Accessibility (WCAG AA); FERPA/COPPA language in TOS.
+
+Reporting & KPIs (auto)
+
+Employers: time-to-interview, offers, 90-day retention.
+
+Districts: WBL hours, artifacts/student, audit-ready logs.
+
+Program: pathways authored, projects/month, student engagement.
+
+Templates you can use tomorrow
+
+Project Card fields: Title, Duration, Objective, Prereqs, Steps, Tools/PPE, Safety/JHA notes, Artifact required, Sign-off owner, Capacity/month, Windows, Location.
+
+Rubric row: Competency → Evidence (artifact) → Criteria (Novice/Developing/Proficient) → Sign-off.
+
+Who’s in the digital workshop?
+
+Yes—education partners should attend (CTE teacher + WBL coordinator). If calendars clash: run an employer-only digital session first (collect tasks/safety/artifacts), then a teacher alignment session within 72 hours to map to standards and credit.
+
+If you want, I can spin up the Airtable base + Google Forms structure and give you shareable links you can use for your next workshop, or sketch the Next.js/Supabase schema and user flows as a dev-ready brief.
