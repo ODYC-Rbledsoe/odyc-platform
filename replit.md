@@ -107,6 +107,18 @@ The application uses three main entities:
 - Future migrations should use Flask-Migrate
 
 ## Changelog
+- September 30, 2025: Implemented comprehensive Pathway Workshop System
+  - Added project-based learning infrastructure with ProjectCard, Rubric, Artifact, SkillsBadge models
+  - Built employer/educator workshop dashboard for co-authoring career pathways
+  - Created project card builder with safety requirements, PPE tracking, and artifact specifications
+  - Implemented assessment rubric system with performance levels (novice, developing, proficient)
+  - Built student interface for browsing projects and submitting work artifacts
+  - Created mentor review workflow for approving student work and awarding skills badges
+  - Added skills transcript generation with PDF export capability
+  - Integrated workshop navigation across all user roles (student, mentor, employer, coordinator, admin)
+  - Workshop methodology enables industry-led pathway development with hands-on projects
+  - Students earn stackable, industry-recognized credentials through verified project completion
+  
 - August 11, 2025: Integrated National Career Clusters Framework into ODYC
   - Added CareerCluster model with 14 official clusters from modernized framework
   - Linked existing local industries to appropriate career clusters
