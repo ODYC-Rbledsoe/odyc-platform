@@ -391,7 +391,7 @@ def mentor_review_dashboard():
     """Mentor dashboard for reviewing artifacts"""
     if not (current_user.is_mentor() or current_user.is_admin() or current_user.role == 'coordinator'):
         flash('Access denied. This page is for mentors and coordinators.', 'danger')
-        return redirect(url_for('dashboard.index'))
+        return redirect(url_for('dashboard.dashboard'))
     
     # Get artifacts needing review
     pending = Artifact.query.filter_by(status='submitted')\
@@ -411,7 +411,7 @@ def review_artifact(artifact_id):
     """Review and sign off on student artifact"""
     if not (current_user.is_mentor() or current_user.is_admin() or current_user.role == 'coordinator'):
         flash('Access denied.', 'danger')
-        return redirect(url_for('dashboard.index'))
+        return redirect(url_for('dashboard.dashboard'))
     
     artifact = Artifact.query.get_or_404(artifact_id)
     form = MentorSignoffForm()
@@ -457,3 +457,192 @@ def review_artifact(artifact_id):
     return render_template('workshop/review_artifact.html',
                           form=form,
                           artifact=artifact)
+
+# Skills Transcript
+@workshop_bp.route('/transcript/<int:student_id>')
+@login_required
+def skills_transcript(student_id):
+    """Generate skills transcript for a student"""
+    # Only allow students to view their own, or mentors/admins to view any
+    if current_user.id != student_id and not (current_user.is_admin() or current_user.is_mentor() or current_user.role == 'coordinator'):
+        flash('Access denied.', 'danger')
+        return redirect(url_for('dashboard.dashboard'))
+    
+    from models import User
+    student = User.query.get_or_404(student_id)
+    
+    if not student.is_student():
+        flash('Skills transcripts are only available for students.', 'warning')
+        return redirect(url_for('dashboard.dashboard'))
+    
+    # Get student's completed artifacts
+    artifacts = Artifact.query.filter_by(student_id=student_id, status='approved')\
+                              .order_by(Artifact.reviewed_at.desc()).all()
+    
+    # Get earned badges
+    badges = StudentBadge.query.filter_by(student_id=student_id)\
+                               .order_by(StudentBadge.earned_at.desc()).all()
+    
+    # Calculate totals
+    total_hours = sum(a.project_card.duration_hours for a in artifacts)
+    pathways = set(a.project_card.pathway for a in artifacts)
+    
+    return render_template('workshop/skills_transcript.html',
+                          student=student,
+                          artifacts=artifacts,
+                          badges=badges,
+                          total_hours=total_hours,
+                          pathways=pathways)
+
+@workshop_bp.route('/transcript/<int:student_id>/pdf')
+@login_required
+def download_transcript_pdf(student_id):
+    """Download skills transcript as PDF"""
+    from io import BytesIO
+    from flask import make_response
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import inch
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+    from reportlab.lib.enums import TA_CENTER, TA_LEFT
+    from datetime import datetime
+    
+    # Authorization check
+    if current_user.id != student_id and not (current_user.is_admin() or current_user.is_mentor() or current_user.role == 'coordinator'):
+        flash('Access denied.', 'danger')
+        return redirect(url_for('dashboard.dashboard'))
+    
+    from models import User
+    student = User.query.get_or_404(student_id)
+    
+    # Get data
+    artifacts = Artifact.query.filter_by(student_id=student_id, status='approved')\
+                              .order_by(Artifact.reviewed_at.desc()).all()
+    badges = StudentBadge.query.filter_by(student_id=student_id)\
+                               .order_by(StudentBadge.earned_at.desc()).all()
+    
+    # Create PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
+    story = []
+    
+    # Styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor=colors.HexColor('#2E7D32'),
+        alignment=TA_CENTER,
+        spaceAfter=12
+    )
+    heading_style = ParagraphStyle(
+        'CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=14,
+        textColor=colors.HexColor('#1976D2'),
+        spaceAfter=6
+    )
+    
+    # Header
+    story.append(Paragraph("ODYC Skills Transcript", title_style))
+    story.append(Paragraph("Southwest Wyoming Workforce Development", styles['Normal']))
+    story.append(Spacer(1, 0.3*inch))
+    
+    # Student Info
+    story.append(Paragraph("Student Information", heading_style))
+    student_data = [
+        ['Student Name:', student.name],
+        ['Email:', student.email],
+        ['Generated:', datetime.utcnow().strftime('%B %d, %Y')]
+    ]
+    student_table = Table(student_data, colWidths=[2*inch, 4*inch])
+    student_table.setStyle(TableStyle([
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+    ]))
+    story.append(student_table)
+    story.append(Spacer(1, 0.3*inch))
+    
+    # Summary Stats
+    total_hours = sum(a.project_card.duration_hours for a in artifacts)
+    story.append(Paragraph("Summary", heading_style))
+    summary_data = [
+        ['Completed Projects:', str(len(artifacts))],
+        ['Total Training Hours:', f'{total_hours} hours'],
+        ['Badges Earned:', str(len(badges))]
+    ]
+    summary_table = Table(summary_data, colWidths=[2*inch, 4*inch])
+    summary_table.setStyle(TableStyle([
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+    ]))
+    story.append(summary_table)
+    story.append(Spacer(1, 0.3*inch))
+    
+    # Earned Badges
+    if badges:
+        story.append(Paragraph("Earned Credentials", heading_style))
+        badge_data = [['Badge Name', 'Earned Date', 'Industry Recognized']]
+        for sb in badges:
+            badge_data.append([
+                sb.badge.name,
+                sb.earned_at.strftime('%m/%d/%Y'),
+                'Yes' if sb.badge.industry_recognized else 'No'
+            ])
+        badge_table = Table(badge_data, colWidths=[3*inch, 1.5*inch, 1.5*inch])
+        badge_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#FFC107')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ]))
+        story.append(badge_table)
+        story.append(Spacer(1, 0.3*inch))
+    
+    # Completed Projects
+    story.append(Paragraph("Completed Projects", heading_style))
+    project_data = [['Project Title', 'Pathway', 'Hours', 'Performance', 'Completed']]
+    for artifact in artifacts:
+        project_data.append([
+            artifact.project_card.title[:40],
+            artifact.project_card.pathway.name[:30],
+            str(artifact.project_card.duration_hours),
+            artifact.performance_level.title() if artifact.performance_level else 'N/A',
+            artifact.reviewed_at.strftime('%m/%d/%Y') if artifact.reviewed_at else 'N/A'
+        ])
+    project_table = Table(project_data, colWidths=[2.2*inch, 1.8*inch, 0.6*inch, 1*inch, 1*inch])
+    project_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4CAF50')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 8),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    story.append(project_table)
+    story.append(Spacer(1, 0.5*inch))
+    
+    # Footer
+    footer_text = "This transcript documents hands-on project completion and skills development through ODYC's industry-partnered workforce development program."
+    story.append(Paragraph(footer_text, styles['Italic']))
+    
+    # Build PDF
+    doc.build(story)
+    buffer.seek(0)
+    
+    # Return PDF
+    response = make_response(buffer.getvalue())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=ODYC_Skills_Transcript_{student.name.replace(" ", "_")}.pdf'
+    
+    return response
