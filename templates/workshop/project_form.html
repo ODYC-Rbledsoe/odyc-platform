@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('workshop.dashboard') }}">Workshop</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('workshop.pathway_detail', pathway_id=pathway.id) }}">{{ pathway.name }}</a></li>
+            <li class="breadcrumb-item active">{% if edit_mode %}Edit{% else %}New{% endif %} Project Card</li>
+        </ol>
+    </nav>
+
+    <h2>{% if edit_mode %}Edit{% else %}Create{% endif %} Project Card</h2>
+    <p class="text-muted">Design a hands-on project for {{ pathway.name }}</p>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-info-circle"></i> Project Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control") }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.objective.label(class="form-label") }}
+                            {{ form.objective(class="form-control") }}
+                            <small class="form-text text-muted">What will students accomplish through this project?</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.duration_hours.label(class="form-label") }}
+                                {{ form.duration_hours(class="form-select") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.location_type.label(class="form-label") }}
+                                {{ form.location_type(class="form-select") }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-list-ol"></i> Prerequisites & Steps</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.prerequisites.label(class="form-label") }}
+                            {{ form.prerequisites(class="form-control") }}
+                            <small class="form-text text-muted">One per line</small>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.steps.label(class="form-label") }}
+                            {{ form.steps(class="form-control") }}
+                            <small class="form-text text-muted">Step-by-step instructions (one per line)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-hard-hat"></i> Safety & Materials</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.safety_notes.label(class="form-label") }}
+                            {{ form.safety_notes(class="form-control") }}
+                            <small class="form-text text-muted">OSHA requirements, hazards, JHA notes</small>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.ppe_required.label(class="form-label") }}
+                            {{ form.ppe_required(class="form-control") }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.tools_materials.label(class="form-label") }}
+                            {{ form.tools_materials(class="form-control") }}
+                            <small class="form-text text-muted">One per line</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-file-upload"></i> Student Artifact</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.artifact_type.label(class="form-label") }}
+                            {{ form.artifact_type(class="form-select") }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.artifact_description.label(class="form-label") }}
+                            {{ form.artifact_description(class="form-control") }}
+                            <small class="form-text text-muted">What should students submit to demonstrate completion?</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-3 sticky-top" style="top: 20px;">
+                    <div class="card-header">
+                        <h5><i class="fas fa-cogs"></i> Logistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.capacity_per_month.label(class="form-label") }}
+                            {{ form.capacity_per_month(class="form-control") }}
+                            <small class="form-text text-muted">How many students can complete this per month?</small>
+                        </div>
+
+                        <div class="form-check mb-2">
+                            {{ form.mentor_required(class="form-check-input") }}
+                            {{ form.mentor_required.label(class="form-check-label") }}
+                        </div>
+
+                        <div class="form-check mb-3">
+                            {{ form.supervisor_signoff(class="form-check-input") }}
+                            {{ form.supervisor_signoff.label(class="form-check-label") }}
+                        </div>
+
+                        <hr>
+
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                            <a href="{{ url_for('workshop.pathway_detail', pathway_id=pathway.id) }}" 
+                               class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6><i class="fas fa-lightbulb"></i> Tips</h6>
+                        <ul class="small">
+                            <li>Break complex tasks into clear steps</li>
+                            <li>Specify exact safety requirements</li>
+                            <li>Define clear, measurable artifacts</li>
+                            <li>Consider school calendar constraints</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

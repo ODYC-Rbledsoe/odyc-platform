@@ -1,0 +1,261 @@
+from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask_login import login_required, current_user
+from app import db
+from models import (CareerPathway, ProjectCard, Rubric, Artifact, SkillsBadge, 
+                   StudentBadge, SkillsTranscript, User)
+from forms import (ProjectCardForm, RubricForm, ArtifactSubmissionForm, 
+                  MentorSignoffForm, SkillsBadgeForm)
+from datetime import datetime
+import json
+
+workshop_bp = Blueprint('workshop', __name__)
+
+@workshop_bp.route('/workshop')
+@login_required
+def dashboard():
+    """Pathway workshop dashboard for employers and educators"""
+    if not (current_user.is_admin() or current_user.is_employer() or current_user.role == 'coordinator'):
+        flash('Access denied. Workshop tools are for employers, coordinators, and administrators.', 'danger')
+        return redirect(url_for('dashboard.index'))
+    
+    # Get all pathways with their project cards
+    pathways = CareerPathway.query.filter_by(is_active=True).all()
+    
+    # Statistics
+    total_projects = ProjectCard.query.filter_by(is_active=True).count()
+    published_projects = ProjectCard.query.filter_by(is_active=True, is_published=True).count()
+    total_rubrics = Rubric.query.count()
+    total_badges = SkillsBadge.query.count()
+    
+    return render_template('workshop/dashboard.html',
+                          pathways=pathways,
+                          total_projects=total_projects,
+                          published_projects=published_projects,
+                          total_rubrics=total_rubrics,
+                          total_badges=total_badges)
+
+@workshop_bp.route('/workshop/pathway/<int:pathway_id>')
+@login_required
+def pathway_detail(pathway_id):
+    """View all project cards for a pathway"""
+    if not (current_user.is_admin() or current_user.is_employer() or current_user.role == 'coordinator'):
+        flash('Access denied.', 'danger')
+        return redirect(url_for('dashboard.index'))
+    
+    pathway = CareerPathway.query.get_or_404(pathway_id)
+    project_cards = ProjectCard.query.filter_by(pathway_id=pathway_id, is_active=True).all()
+    rubrics = Rubric.query.filter_by(pathway_id=pathway_id).all()
+    badges = SkillsBadge.query.filter_by(pathway_id=pathway_id).all()
+    
+    return render_template('workshop/pathway_detail.html',
+                          pathway=pathway,
+                          project_cards=project_cards,
+                          rubrics=rubrics,
+                          badges=badges)
+
+@workshop_bp.route('/workshop/project/new/<int:pathway_id>', methods=['GET', 'POST'])
+@login_required
+def create_project(pathway_id):
+    """Create a new project card"""
+    if not (current_user.is_admin() or current_user.is_employer() or current_user.role == 'coordinator'):
+        flash('Access denied.', 'danger')
+        return redirect(url_for('dashboard.index'))
+    
+    pathway = CareerPathway.query.get_or_404(pathway_id)
+    form = ProjectCardForm()
+    form.pathway_id.choices = [(pathway.id, pathway.name)]
+    form.pathway_id.data = pathway.id
+    
+    if form.validate_on_submit():
+        # Convert text fields to JSON arrays
+        prereqs_list = [p.strip() for p in (form.prerequisites.data or '').split('\n') if p.strip()]
+        steps_list = [s.strip() for s in (form.steps.data or '').split('\n') if s.strip()]
+        tools_list = [t.strip() for t in (form.tools_materials.data or '').split('\n') if t.strip()] if form.tools_materials.data else []
+        
+        project = ProjectCard(
+            pathway_id=form.pathway_id.data,
+            title=form.title.data,
+            objective=form.objective.data,
+            duration_hours=form.duration_hours.data,
+            prerequisites=json.dumps(prereqs_list),
+            steps=json.dumps(steps_list),
+            safety_notes=form.safety_notes.data,
+            tools_materials=json.dumps(tools_list),
+            ppe_required=form.ppe_required.data,
+            artifact_type=form.artifact_type.data,
+            artifact_description=form.artifact_description.data,
+            location_type=form.location_type.data,
+            capacity_per_month=form.capacity_per_month.data,
+            mentor_required=form.mentor_required.data,
+            supervisor_signoff=form.supervisor_signoff.data,
+            created_by_id=current_user.id,
+            is_active=True,
+            is_published=False  # Requires educator approval
+        )
+        db.session.add(project)
+        db.session.commit()
+        
+        flash(f'Project card "{project.title}" created successfully! It needs educator approval before publishing.', 'success')
+        return redirect(url_for('workshop.pathway_detail', pathway_id=pathway_id))
+    
+    return render_template('workshop/project_form.html', form=form, pathway=pathway, edit_mode=False)
+
+@workshop_bp.route('/workshop/project/<int:project_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_project(project_id):
+    """Edit an existing project card"""
+    if not (current_user.is_admin() or current_user.is_employer() or current_user.role == 'coordinator'):
+        flash('Access denied.', 'danger')
+        return redirect(url_for('dashboard.index'))
+    
+    project = ProjectCard.query.get_or_404(project_id)
+    form = ProjectCardForm(obj=project)
+    form.pathway_id.choices = [(p.id, p.name) for p in CareerPathway.query.filter_by(is_active=True).all()]
+    
+    if request.method == 'GET':
+        # Populate form with existing data
+        form.pathway_id.data = project.pathway_id
+        form.prerequisites.data = '\n'.join(project.prerequisites_list)
+        form.steps.data = '\n'.join(project.steps_list)
+        if project.tools_materials:
+            try:
+                tools_list = json.loads(project.tools_materials)
+                form.tools_materials.data = '\n'.join(tools_list)
+            except:
+                pass
+    
+    if form.validate_on_submit():
+        # Update project
+        prereqs_list = [p.strip() for p in (form.prerequisites.data or '').split('\n') if p.strip()]
+        steps_list = [s.strip() for s in (form.steps.data or '').split('\n') if s.strip()]
+        tools_list = [t.strip() for t in (form.tools_materials.data or '').split('\n') if t.strip()] if form.tools_materials.data else []
+        
+        project.pathway_id = form.pathway_id.data
+        project.title = form.title.data
+        project.objective = form.objective.data
+        project.duration_hours = form.duration_hours.data
+        project.prerequisites = json.dumps(prereqs_list)
+        project.steps = json.dumps(steps_list)
+        project.safety_notes = form.safety_notes.data
+        project.tools_materials = json.dumps(tools_list)
+        project.ppe_required = form.ppe_required.data
+        project.artifact_type = form.artifact_type.data
+        project.artifact_description = form.artifact_description.data
+        project.location_type = form.location_type.data
+        project.capacity_per_month = form.capacity_per_month.data
+        project.mentor_required = form.mentor_required.data
+        project.supervisor_signoff = form.supervisor_signoff.data
+        project.updated_at = datetime.utcnow()
+        
+        db.session.commit()
+        flash(f'Project card "{project.title}" updated successfully!', 'success')
+        return redirect(url_for('workshop.pathway_detail', pathway_id=project.pathway_id))
+    
+    return render_template('workshop/project_form.html', form=form, pathway=project.pathway, 
+                          project=project, edit_mode=True)
+
+@workshop_bp.route('/workshop/project/<int:project_id>/publish', methods=['POST'])
+@login_required
+def publish_project(project_id):
+    """Publish a project card for students (educator approval)"""
+    if not (current_user.is_admin() or current_user.role == 'coordinator'):
+        flash('Only coordinators and administrators can publish projects.', 'danger')
+        return redirect(url_for('workshop.dashboard'))
+    
+    project = ProjectCard.query.get_or_404(project_id)
+    project.is_published = True
+    project.approved_by_id = current_user.id
+    db.session.commit()
+    
+    flash(f'Project card "{project.title}" is now published and available to students!', 'success')
+    return redirect(url_for('workshop.pathway_detail', pathway_id=project.pathway_id))
+
+@workshop_bp.route('/workshop/project/<int:project_id>/unpublish', methods=['POST'])
+@login_required
+def unpublish_project(project_id):
+    """Unpublish a project card"""
+    if not (current_user.is_admin() or current_user.role == 'coordinator'):
+        flash('Access denied.', 'danger')
+        return redirect(url_for('workshop.dashboard'))
+    
+    project = ProjectCard.query.get_or_404(project_id)
+    project.is_published = False
+    db.session.commit()
+    
+    flash(f'Project card "{project.title}" has been unpublished.', 'info')
+    return redirect(url_for('workshop.pathway_detail', pathway_id=project.pathway_id))
+
+@workshop_bp.route('/workshop/rubric/new/<int:pathway_id>', methods=['GET', 'POST'])
+@login_required
+def create_rubric(pathway_id):
+    """Create a new assessment rubric"""
+    if not (current_user.is_admin() or current_user.role == 'coordinator'):
+        flash('Access denied.', 'danger')
+        return redirect(url_for('workshop.dashboard'))
+    
+    pathway = CareerPathway.query.get_or_404(pathway_id)
+    form = RubricForm()
+    form.pathway_id.choices = [(pathway.id, pathway.name)]
+    form.pathway_id.data = pathway.id
+    
+    # Get project cards for this pathway
+    project_cards = ProjectCard.query.filter_by(pathway_id=pathway_id, is_active=True).all()
+    form.project_card_id.choices = [(0, 'General (not specific to a project)')] + \
+                                    [(p.id, p.title) for p in project_cards]
+    
+    if form.validate_on_submit():
+        rubric = Rubric(
+            pathway_id=form.pathway_id.data,
+            project_card_id=form.project_card_id.data if form.project_card_id.data != 0 else None,
+            competency=form.competency.data,
+            novice_criteria=form.novice_criteria.data,
+            developing_criteria=form.developing_criteria.data,
+            proficient_criteria=form.proficient_criteria.data,
+            weight=form.weight.data,
+            is_required=form.is_required.data
+        )
+        db.session.add(rubric)
+        db.session.commit()
+        
+        flash(f'Rubric for "{rubric.competency}" created successfully!', 'success')
+        return redirect(url_for('workshop.pathway_detail', pathway_id=pathway_id))
+    
+    return render_template('workshop/rubric_form.html', form=form, pathway=pathway)
+
+@workshop_bp.route('/workshop/badge/new/<int:pathway_id>', methods=['GET', 'POST'])
+@login_required
+def create_badge(pathway_id):
+    """Create a new skills badge"""
+    if not (current_user.is_admin() or current_user.role == 'coordinator'):
+        flash('Access denied.', 'danger')
+        return redirect(url_for('workshop.dashboard'))
+    
+    pathway = CareerPathway.query.get_or_404(pathway_id)
+    form = SkillsBadgeForm()
+    form.pathway_id.choices = [(0, 'General (not pathway-specific)')] + \
+                               [(p.id, p.name) for p in CareerPathway.query.filter_by(is_active=True).all()]
+    
+    # Get project cards for this pathway
+    project_cards = ProjectCard.query.filter_by(pathway_id=pathway_id, is_active=True).all()
+    form.project_card_id.choices = [(0, 'General (not project-specific)')] + \
+                                    [(p.id, p.title) for p in project_cards]
+    
+    if form.validate_on_submit():
+        badge = SkillsBadge(
+            name=form.name.data,
+            description=form.description.data,
+            icon_class=form.icon_class.data,
+            color_code=form.color_code.data,
+            pathway_id=form.pathway_id.data if form.pathway_id.data != 0 else None,
+            project_card_id=form.project_card_id.data if form.project_card_id.data != 0 else None,
+            required_artifacts=form.required_artifacts.data,
+            industry_recognized=form.industry_recognized.data,
+            stackable=form.stackable.data
+        )
+        db.session.add(badge)
+        db.session.commit()
+        
+        flash(f'Badge "{badge.name}" created successfully!', 'success')
+        return redirect(url_for('workshop.pathway_detail', pathway_id=pathway_id))
+    
+    return render_template('workshop/badge_form.html', form=form, pathway=pathway)

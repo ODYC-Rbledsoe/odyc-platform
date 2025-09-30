@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2><i class="fas fa-tools"></i> Pathway Workshop</h2>
+            <p class="text-muted">Co-author hiring-ready pathways with project cards, rubrics, and skills badges</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-project-diagram"></i> Project Cards</h5>
+                    <h2>{{ total_projects }}</h2>
+                    <small>{{ published_projects }} published</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-clipboard-check"></i> Rubrics</h5>
+                    <h2>{{ total_rubrics }}</h2>
+                    <small>Assessment criteria</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-certificate"></i> Skills Badges</h5>
+                    <h2>{{ total_badges }}</h2>
+                    <small>Digital credentials</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-route"></i> Pathways</h5>
+                    <h2>{{ pathways|length }}</h2>
+                    <small>Career tracks</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pathways List -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-route"></i> Career Pathways</h5>
+                </div>
+                <div class="card-body">
+                    {% if pathways %}
+                    <div class="list-group">
+                        {% for pathway in pathways %}
+                        <a href="{{ url_for('workshop.pathway_detail', pathway_id=pathway.id) }}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ pathway.name }}</h5>
+                                <span class="badge bg-primary">{{ pathway.project_cards|length }} projects</span>
+                            </div>
+                            <p class="mb-1 text-muted">{{ pathway.description[:200] }}...</p>
+                            <small>
+                                <span class="badge bg-success me-2">{{ pathway.rubrics|length }} rubrics</span>
+                                <span class="badge bg-warning text-dark">{{ pathway.badges|length }} badges</span>
+                            </small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No career pathways found. Contact an administrator to create pathways.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workshop Guide -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card bg-light">
+                <div class="card-header">
+                    <h5><i class="fas fa-book"></i> Workshop Guide</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Creating Hiring-Ready Pathways:</h6>
+                    <ol>
+                        <li><strong>Choose a Pathway</strong> - Select the career pathway you want to develop</li>
+                        <li><strong>Create Project Cards</strong> - Define 4-6 hands-on projects with objectives, steps, safety notes, and artifacts</li>
+                        <li><strong>Build Rubrics</strong> - Create assessment criteria for each competency (Novice → Developing → Proficient)</li>
+                        <li><strong>Design Badges</strong> - Create digital badges that students earn upon completion</li>
+                        <li><strong>Educator Review</strong> - Coordinators align to WY CTE standards and publish for students</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

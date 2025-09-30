@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('workshop.dashboard') }}">Workshop</a></li>
+                    <li class="breadcrumb-item active">{{ pathway.name }}</li>
+                </ol>
+            </nav>
+            <h2>{{ pathway.name }}</h2>
+            <p class="text-muted">{{ pathway.description }}</p>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <a href="{{ url_for('workshop.create_project', pathway_id=pathway.id) }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Project Card
+            </a>
+            {% if current_user.is_admin() or current_user.role == 'coordinator' %}
+            <a href="{{ url_for('workshop.create_rubric', pathway_id=pathway.id) }}" class="btn btn-success">
+                <i class="fas fa-clipboard-check"></i> Create Rubric
+            </a>
+            <a href="{{ url_for('workshop.create_badge', pathway_id=pathway.id) }}" class="btn btn-warning">
+                <i class="fas fa-certificate"></i> Create Badge
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Project Cards -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-project-diagram"></i> Project Cards</h5>
+                </div>
+                <div class="card-body">
+                    {% if project_cards %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Duration</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for project in project_cards %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ project.title }}</strong><br>
+                                        <small class="text-muted">{{ project.objective[:100] }}...</small>
+                                    </td>
+                                    <td>{{ project.duration_hours }} hrs</td>
+                                    <td>
+                                        {% if project.location_type == 'onsite' %}
+                                        <span class="badge bg-info">On-site</span>
+                                        {% elif project.location_type == 'school' %}
+                                        <span class="badge bg-secondary">School</span>
+                                        {% else %}
+                                        <span class="badge bg-primary">Hybrid</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if project.is_published %}
+                                        <span class="badge bg-success">Published</span>
+                                        {% else %}
+                                        <span class="badge bg-warning text-dark">Draft</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('workshop.edit_project', project_id=project.id) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        {% if current_user.is_admin() or current_user.role == 'coordinator' %}
+                                            {% if project.is_published %}
+                                            <form method="POST" action="{{ url_for('workshop.unpublish_project', project_id=project.id) }}" 
+                                                  style="display: inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline-warning">
+                                                    <i class="fas fa-eye-slash"></i> Unpublish
+                                                </button>
+                                            </form>
+                                            {% else %}
+                                            <form method="POST" action="{{ url_for('workshop.publish_project', project_id=project.id) }}" 
+                                                  style="display: inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline-success">
+                                                    <i class="fas fa-check"></i> Publish
+                                                </button>
+                                            </form>
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No project cards created yet. 
+                        <a href="{{ url_for('workshop.create_project', pathway_id=pathway.id) }}">Create the first one</a>!
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rubrics and Badges Row -->
+    <div class="row">
+        <!-- Rubrics -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-clipboard-check"></i> Assessment Rubrics</h5>
+                </div>
+                <div class="card-body">
+                    {% if rubrics %}
+                    <div class="list-group">
+                        {% for rubric in rubrics %}
+                        <div class="list-group-item">
+                            <h6>{{ rubric.competency }}</h6>
+                            <small class="text-muted">
+                                Weight: {{ rubric.weight }} | 
+                                {% if rubric.is_required %}Required{% else %}Optional{% endif %}
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No rubrics created yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Badges -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-certificate"></i> Skills Badges</h5>
+                </div>
+                <div class="card-body">
+                    {% if badges %}
+                    <div class="row">
+                        {% for badge in badges %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card" style="border-left: 4px solid {{ badge.color_code or '#4CAF50' }};">
+                                <div class="card-body">
+                                    <h6>
+                                        <i class="{{ badge.icon_class or 'fas fa-certificate' }}"></i>
+                                        {{ badge.name }}
+                                    </h6>
+                                    <small class="text-muted">{{ badge.description[:80] }}...</small>
+                                    {% if badge.industry_recognized %}
+                                    <br><span class="badge bg-success mt-2">Industry Recognized</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No badges created yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('workshop.dashboard') }}">Workshop</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('workshop.pathway_detail', pathway_id=pathway.id) }}">{{ pathway.name }}</a></li>
+            <li class="breadcrumb-item active">New Rubric</li>
+        </ol>
+    </nav>
+
+    <h2>Create Assessment Rubric</h2>
+    <p class="text-muted">Define performance levels for {{ pathway.name }}</p>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-clipboard-check"></i> Competency</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.competency.label(class="form-label") }}
+                            {{ form.competency(class="form-control") }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.project_card_id.label(class="form-label") }}
+                            {{ form.project_card_id(class="form-select") }}
+                            <small class="form-text text-muted">Optional: Link to a specific project card</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-line"></i> Performance Levels</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-danger">{{ form.novice_criteria.label.text }}</label>
+                            {{ form.novice_criteria(class="form-control") }}
+                            <small class="form-text text-muted">What does beginner performance look like?</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-warning">{{ form.developing_criteria.label.text }}</label>
+                            {{ form.developing_criteria(class="form-control") }}
+                            <small class="form-text text-muted">What does developing performance look like?</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-success">{{ form.proficient_criteria.label.text }}</label>
+                            {{ form.proficient_criteria(class="form-control") }}
+                            <small class="form-text text-muted">What does mastery look like?</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-3 sticky-top" style="top: 20px;">
+                    <div class="card-header">
+                        <h5><i class="fas fa-cogs"></i> Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.weight.label(class="form-label") }}
+                            {{ form.weight(class="form-control") }}
+                            <small class="form-text text-muted">For weighted scoring</small>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            {{ form.is_required(class="form-check-input") }}
+                            {{ form.is_required.label(class="form-check-label") }}
+                        </div>
+
+                        <hr>
+
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-success btn-lg") }}
+                            <a href="{{ url_for('workshop.pathway_detail', pathway_id=pathway.id) }}" 
+                               class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6><i class="fas fa-lightbulb"></i> Rubric Tips</h6>
+                        <ul class="small">
+                            <li>Use observable behaviors</li>
+                            <li>Be specific and measurable</li>
+                            <li>Align with industry standards</li>
+                            <li>Focus on critical skills</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
