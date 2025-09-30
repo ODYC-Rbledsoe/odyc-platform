@@ -107,17 +107,17 @@ The application uses three main entities:
 - Future migrations should use Flask-Migrate
 
 ## Changelog
-- September 30, 2025: Implemented comprehensive Pathway Workshop System
-  - Added project-based learning infrastructure with ProjectCard, Rubric, Artifact, SkillsBadge models
-  - Built employer/educator workshop dashboard for co-authoring career pathways
-  - Created project card builder with safety requirements, PPE tracking, and artifact specifications
-  - Implemented assessment rubric system with performance levels (novice, developing, proficient)
-  - Built student interface for browsing projects and submitting work artifacts
-  - Created mentor review workflow for approving student work and awarding skills badges
-  - Added skills transcript generation with PDF export capability
-  - Integrated workshop navigation across all user roles (student, mentor, employer, coordinator, admin)
-  - Workshop methodology enables industry-led pathway development with hands-on projects
-  - Students earn stackable, industry-recognized credentials through verified project completion
+- September 30, 2025: Launched ODYC Path Mapper - Job-to-Education Routing System
+  - **Path Mapper Models**: JobPosting, EducationProgram, Skill, SkillAlignment, StudentPlan
+  - **Real Data Integration**: Seeded with J.R. Simplot Industrial Maintenance Mechanic position and WWCC Industrial Maintenance Technology program
+  - **3-Page Workflow**: Job Picker → Program Match (with coverage matrix) → My Plan (personalized 4-step checklist)
+  - **Skills Coverage Matrix**: Visual alignment showing 7/8 skills covered between Simplot job requirements and WWCC program outcomes
+  - **Real Skills**: Hydraulics, pneumatics, alignments, electrical systems, mechanical troubleshooting, blueprint reading, safety protocols
+  - **Personalized Plans**: 4-step enrollment roadmap (WWCC application → advising → financial aid → aptitude test prep)
+  - **Navigation Integration**: Added "Find Your Path" to student navigation for easy access
+  - **Design Philosophy**: Smart career counselor that extracts job skills and maps them to existing WWCC programs
+  - **Maintained**: Full mentorship matching system remains operational alongside Path Mapper
+  - **Next Vision**: Expand with more Southwest Wyoming employers (WeSoda, Tata, Genesis Alkali) and WWCC/RSHS programs
   
 - August 11, 2025: Integrated National Career Clusters Framework into ODYC
   - Added CareerCluster model with 14 official clusters from modernized framework
