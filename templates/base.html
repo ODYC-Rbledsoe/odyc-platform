@@ -56,21 +56,12 @@
                             <li><a class="dropdown-item" href="{{ url_for('admin.manage_pathway_clusters') }}">
                                 <i class="fas fa-link me-2"></i>Pathway Mappings
                             </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('workshop.dashboard') }}">
-                                <i class="fas fa-tools me-2"></i>Pathway Workshop
-                            </a></li>
                         </ul>
                     </li>
                     {% elif current_user.is_mentor() %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('curriculum.mentor_curriculum') }}">
                             <i class="fas fa-chalkboard-teacher me-1"></i>Curriculum
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('workshop.mentor_review_dashboard') }}">
-                            <i class="fas fa-clipboard-check me-1"></i>Review Artifacts
                         </a>
                     </li>
                     {% elif current_user.is_student() %}
@@ -92,13 +83,6 @@
                                 <i class="fas fa-book me-2"></i>Learning Modules
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('workshop.student_projects') }}">
-                                <i class="fas fa-tasks me-2"></i>Browse Projects
-                            </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('workshop.my_artifacts') }}">
-                                <i class="fas fa-trophy me-2"></i>My Progress & Badges
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('career.explore_pathways') }}">
                                 <i class="fas fa-compass me-2"></i>Explore Careers
                             </a></li>
@@ -111,16 +95,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('dashboard.coordinator_dashboard') }}">
                             <i class="fas fa-calendar-check me-1"></i>Coordination
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('workshop.dashboard') }}">
-                            <i class="fas fa-tools me-1"></i>Workshop
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('workshop.mentor_review_dashboard') }}">
-                            <i class="fas fa-clipboard-check me-1"></i>Review
                         </a>
                     </li>
                     {% elif current_user.is_employer() %}
@@ -144,9 +118,6 @@
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('employer.sponsorship') }}">
                                 <i class="fas fa-handshake me-2"></i>Sponsorship
-                            </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('workshop.dashboard') }}">
-                                <i class="fas fa-tools me-2"></i>Pathway Workshop
                             </a></li>
                         </ul>
                     </li>

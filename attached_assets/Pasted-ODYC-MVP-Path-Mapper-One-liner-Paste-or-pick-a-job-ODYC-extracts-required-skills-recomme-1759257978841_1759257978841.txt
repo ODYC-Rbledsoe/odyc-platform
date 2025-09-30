@@ -1,0 +1,158 @@
+ODYC MVP — “Path Mapper”
+
+One-liner: Paste (or pick) a job → ODYC extracts required skills → recommends an existing local program that covers those skills → gives the student a clear, step-by-step enrollment plan.
+
+1) What ODYC shows the student (for your Simplot example)
+
+Target job: Industrial Maintenance Mechanic (Simplot, Rock Springs) — JD calls out hydraulics, pneumatics, alignments, pump/valve rebuilds, blueprint reading, documentation, troubleshooting, physical/conditions, and an aptitude test.
+
+Recommended program: WWCC — Industrial Maintenance Technology (A.A.S. and certificates), which trains in:
+
+Plant safety & rigging; blueprint reading
+
+Bearings, lubrication & centrifugal pumps
+
+Mechanical drives & alignment
+
+Hydraulics & pneumatics
+
+Industrial electricity & motor controls
+
+Vibration analysis, troubleshooting, machining & welding 
+westernwyoming.edu
+
+Closest certificate option (fastest on-ramp): Maintenance Mechanic Certificate (choose ~36 credits from INDM courses like Industrial Mechanics I/II, etc.). ODYC can list the relevant INDM courses that map to the JD’s skills. 
+catalog.westernwyoming.edu
++1
+
+Why it matches (coverage matrix):
+
+Hydraulics & pneumatics → INDM/ESTM Hydraulics & Pneumatics modules/courses. 
+catalog.wwcc.edu
+
+Pumps/bearings/lube → Bearings, lubrication & centrifugal pumps outcomes. 
+westernwyoming.edu
+
+Mechanical drives & alignment → Industrial Mechanics sequence & alignment topics. 
+westernwyoming.edu
+
+Blueprint reading, electricity/controls, troubleshooting → in the WWCC outcomes/course lineup. 
+westernwyoming.edu
++1
+
+“Next steps” checklist (inside ODYC):
+
+Apply to WWCC Industrial Maintenance (A.A.S. or Maintenance Mechanic Certificate). ODYC links to the program + degrees/cert pages. 
+catalog.westernwyoming.edu
++1
+
+Meet with advisor to pick the fastest certificate sequence that hits pumps, pneumatics, alignment early. (Use WWCC class schedule to time your start.) 
+westernwyoming.edu
+
+Prep for employer aptitude screening (Simplot’s JD mentions an aptitude test): ODYC surfaces general mechanical-aptitude resources and recommends WWCC tutoring/test-prep options (no brand-specific claims).
+
+Financial aid & enrollment steps: ODYC links to WWCC’s admissions/aid; encourages FAFSA completion before scheduling blocks.
+
+Timeline options: “1-year certificate → job,” or “A.A.S. (2 years) → broader roles;” ODYC shows a simple Gantt of terms/courses from the certificate picklist. 
+catalog.westernwyoming.edu
+
+2) User flows (lean and real)
+Student
+
+Start: paste a job or choose “Industrial Maintenance Mechanic (Rock Springs).”
+
+See: “Program Match” card with coverage score, matched outcomes, missing gaps (if any), time/cost notes, and Apply to WWCC button (deep link).
+
+Do: click “Build My Plan” → ODYC creates a 3–4 step plan with dates: application, advising, term start, aptitude-test prep.
+
+Save/Share: email the plan to self/parent; download PDF.
+
+Counselor/Teacher
+
+Confirm ODYC’s recommended program; edit the 3–4 step plan; print for student conference.
+
+Employer (optional v0)
+
+Post a “We hire from WWCC’s Industrial Maintenance” blurb (no endorsements implied).
+
+Provide generic notes on aptitude test expectations and interview windows.
+
+3) MVP scope freeze (so you can ship fast)
+
+In
+
+Job → skills extraction (rules-based list for v0).
+
+Program catalog cards for WWCC Industrial Maintenance (A.A.S. + Maintenance Mechanic Certificate). 
+catalog.westernwyoming.edu
++2
+westernwyoming.edu
++2
+
+Coverage matrix (required job skills ↔ program learning outcomes). 
+westernwyoming.edu
+
+“Next steps” plan generator (4 items max).
+
+Links out: Apply, Advising, Class schedule, Financial aid. 
+westernwyoming.edu
+
+Out (later)
+
+SIS integration, account systems, complex analytics.
+
+Multi-college comparisons.
+
+Application submission inside ODYC (just link out for v0).
+
+Definition of done
+
+A student can pick the Simplot job and leave with: a program match, a 4-step plan, and live links to enroll/advising—under 5 minutes.
+
+4) Data you need (tiny schema you can seed in Replit)
+
+jobs
+
+id, title, employer, location, required_skills[]
+
+Example required_skills: ["Hydraulics", "Pneumatics", "Pump/Valve Rebuild", "Alignment", "Blueprint Reading", "Repair Reporting", "Troubleshooting"]
+
+programs
+
+id, provider: "WWCC", name: "Industrial Maintenance Technology (A.A.S.)", url, outcomes[]
+
+Outcomes from WWCC page (“Plant safety & rigging… Hydraulics & pneumatics… Alignment… Electricity/controls…”) 
+westernwyoming.edu
+
+certificates
+
+id, program_id, name: "Maintenance Mechanic Certificate", url, course_picker[] (INDM 1510, 1520, etc.) 
+catalog.westernwyoming.edu
++1
+
+alignment_rules
+
+skill → one or more program outcomes (e.g., “Alignment” → “Mechanical drives & alignment”). 
+westernwyoming.edu
+
+next_steps_templates
+
+For WWCC: “Apply”, “Advising appointment”, “Pick certificate courses”, “Aptitude-test prep”.
+
+5) Tiny UI you can implement today
+
+Page 1: Choose a Job (Simplot card preloaded).
+
+Page 2: Program Match
+
+Coverage bar (e.g., 6/7 skills covered)
+
+Matched outcomes list (with WWCC phrasing) 
+westernwyoming.edu
+
+Button group: “Apply to WWCC,” “Book Advising,” “Class Schedule,” “Financial Aid” 
+westernwyoming.edu
+
+Page 3: My Plan (editable 4-step checklist + dates + print/email)
+
+6) Seed content (drop-in examples)

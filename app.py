@@ -51,7 +51,7 @@ from career_pathways import career_bp
 from employer import employer_bp
 from routes.survey import survey_bp
 from career_clusters import career_clusters_bp
-from pathway_workshop import workshop_bp
+# from pathway_workshop import workshop_bp  # Removed - pivoting to Path Mapper
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(dashboard_bp)
@@ -61,7 +61,7 @@ app.register_blueprint(career_bp)
 app.register_blueprint(employer_bp)
 app.register_blueprint(survey_bp)
 app.register_blueprint(career_clusters_bp)
-app.register_blueprint(workshop_bp)
+# app.register_blueprint(workshop_bp)  # Removed - pivoting to Path Mapper
 
 with app.app_context():
     # Import models to ensure tables are created
